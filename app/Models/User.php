@@ -325,15 +325,14 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasName, 
                 ->relationship(name: 'roles', titleAttribute: 'name', modifyQueryUsing: function (Builder $query) {
                     return $query->whereNotIn('name', ['filament_user']);
                 })
-                ->options(fn () => DB::table('roles')->pluck('name', 'id'))
+                ->options(fn () => DB::table(config('permission.table_names.roles'))->pluck('name', 'id'))
                 ->multiple()
                 ->native(false),
             TextInput::make('password')
                 ->label('Password')
                 ->password()
                 ->dehydrateStateUsing(fn ($state) => Hash::make($state))
-                ->dehydrated(fn ($state) => filled($state))
-                ->required('create'),
+                ->dehydrated(fn ($state) => filled($state)),
             DateTimePicker::make('email_verified_at')
                 ->label('Verifikasi Email')
                 ->default(now())

@@ -41,7 +41,8 @@ class PeriodeResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     //Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->defaultSort('id_periode');
     }
 
     public static function getRelations(): array

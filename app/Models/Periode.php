@@ -39,7 +39,7 @@ class Periode extends Model
     public static function getColumns()
     {
         return [
-            TextColumn::make('id')
+            TextColumn::make('id_periode')
                 ->label('ID')
                 ->searchable()
                 ->sortable(),
@@ -63,7 +63,7 @@ class Periode extends Model
     public static function getForm()
     {
         return [
-            TextInput::make('id')
+            TextInput::make('id_periode')
                 ->label('ID')
                 ->disabled()
                 ->dehydrated(),
@@ -71,7 +71,7 @@ class Periode extends Model
                 ->label('Bulan')
                 ->options(BulanNomor::class)
                 ->required()
-                ->afterStateUpdated(fn(Get $get, Set $set) => $set('id', $get('tahun').$get('bulan'))),
+                ->afterStateUpdated(fn(Get $get, Set $set) => $set('id_periode', $get('tahun').$get('bulan'))),
             TextInput::make('tahun')
                 ->label('Tahun')
                 ->required()
@@ -81,7 +81,7 @@ class Periode extends Model
                         ->where('bulan', $get('bulan'))
                         ->where('tahun', $state);
                 })
-                ->afterStateUpdated(fn(Get $get, Set $set) => $set('id', $get('tahun').$get('bulan'))),
+                ->afterStateUpdated(fn(Get $get, Set $set) => $set('id_periode', $get('tahun').$get('bulan'))),
             ToggleButtons::make('status')
                 ->label('Status Periode')
                 ->options(StatusPeriode::class)
