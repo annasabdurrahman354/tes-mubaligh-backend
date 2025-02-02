@@ -37,7 +37,7 @@ return [
         'database' => [
             'type' => Spatie\LaravelSettings\SettingsRepositories\DatabaseSettingsRepository::class,
             'model' => null,
-            'table' => null,
+            'table' => 'tes_settings',
             'connection' => null,
         ],
         'redis' => [

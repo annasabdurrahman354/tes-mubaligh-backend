@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('filament_exceptions_table', function (Blueprint $table) {
+        Schema::create('tes_filament_exceptions_table', function (Blueprint $table) {
             $table->id();
             $table->string('type', 255);
             $table->string('code');
@@ -29,6 +29,6 @@ return new class extends Migration
 
     public function down()
     {
-        Schema::drop('filament_exceptions_table');
+        Schema::drop('tes_filament_exceptions_table');
     }
 };

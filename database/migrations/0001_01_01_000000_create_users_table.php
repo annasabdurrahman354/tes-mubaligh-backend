@@ -11,21 +11,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
+        Schema::create('tes_users', function (Blueprint $table) {
+            $table->id()->primary();
+            $table->string('nama');
+            $table->string('nama_panggilan')->nullable();
+            $table->string('username');
+            $table->string('jenis_kelamin');
+            $table->string('email');
+            $table->string('nomor_telepon')->nullable();
+            $table->string('nik', 16)->nullable();
+            $table->string('rfid')->nullable();
+            $table->integer('ponpes_id')->nullable();
             $table->string('password');
             $table->rememberToken();
+            $table->timestamp('email_verified_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
-        });
-
-        Schema::create('password_reset_tokens', function (Blueprint $table) {
-            $table->string('email')->primary();
-            $table->string('token');
-            $table->timestamp('created_at')->nullable();
         });
     }
 
@@ -34,7 +35,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('tes_users');
     }
 };

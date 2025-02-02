@@ -3,7 +3,7 @@
 namespace App\Policies;
 
 use App\Models\User;
-use BezhanSalleh\FilamentExceptions\Models\Exception;
+use App\Models\Exception;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ExceptionPolicy

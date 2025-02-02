@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::create('settings', function (Blueprint $table): void {
+        Schema::create('tes_settings', function (Blueprint $table): void {
             $table->id();
 
             $table->string('group');
@@ -20,5 +20,13 @@ return new class extends Migration
 
             $table->unique(['group', 'name']);
         });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('tes_settings');
     }
 };

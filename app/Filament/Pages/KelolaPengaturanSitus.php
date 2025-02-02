@@ -11,7 +11,6 @@ use Filament\Pages\SettingsPage;
 use Filament\Support\Facades\FilamentView;
 use Illuminate\Contracts\Support\Htmlable;
 use function Filament\Support\is_app_url;
-
 class KelolaPengaturanSitus extends SettingsPage
 {
     use HasPageShield;

@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\UserPersonalAccessToken;
 use Carbon\Carbon;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -10,6 +11,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\ValidationException;
+use Laravel\Sanctum\Sanctum;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -49,6 +51,6 @@ class AppServiceProvider extends ServiceProvider
         };
 
         Vite::prefetch(concurrency: 3);
-        //Sanctum::usePersonalAccessTokenModel(UserPersonalAccessToken::class);
+        Sanctum::usePersonalAccessTokenModel(UserPersonalAccessToken::class);
     }
 }
