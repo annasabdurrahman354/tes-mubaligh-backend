@@ -136,22 +136,36 @@ class PesertaKertosono extends Model
                 ->where('penilaian', PenilaianKertosono::TIDAK_LULUS->value),
 
             'hasil_sistem' => AkademikKertosono::selectRaw("
-                CASE
-                    WHEN (SELECT COUNT(*) FROM tes_akademik_kertosono WHERE tes_akademik_kertosono.tes_santri_id = tes_santri.id AND tes_akademik_kertosono.penilaian = '".PenilaianKertosono::LULUS->value."')
-                        >
-                        (SELECT COUNT(*) FROM tes_akademik_kertosono WHERE tes_akademik_kertosono.tes_santri_id = tes_santri.id AND tes_akademik_kertosono.penilaian = '".PenilaianKertosono::TIDAK_LULUS->value."')
-                    THEN '".HasilSistem::LULUS->getLabel()."'
-                    WHEN (SELECT COUNT(*) FROM tes_akademik_kertosono WHERE tes_akademik_kertosono.tes_santri_id = tes_santri.id AND tes_akademik_kertosono.penilaian = '".PenilaianKertosono::TIDAK_LULUS->value."')
-                        >
-                        (SELECT COUNT(*) FROM tes_akademik_kertosono WHERE tes_akademik_kertosono.tes_santri_id = tes_santri.id AND tes_akademik_kertosono.penilaian = '".PenilaianKertosono::LULUS->value."')
-                    THEN '".HasilSistem::TIDAK_LULUS_AKADEMIK->getLabel()."'
-                    WHEN (SELECT COUNT(*) FROM tes_akademik_kertosono WHERE tes_akademik_kertosono.tes_santri_id = tes_santri.id AND tes_akademik_kertosono.penilaian = '".PenilaianKertosono::TIDAK_LULUS->value."')
-                        =
-                        (SELECT COUNT(*) FROM tes_akademik_kertosono WHERE tes_akademik_kertosono.tes_santri_id = tes_santri.id AND tes_akademik_kertosono.penilaian = '".PenilaianKertosono::LULUS->value."')
-                    THEN '".HasilSistem::PERLU_MUSYAWARAH->getLabel()."'
-                    ELSE '".HasilSistem::BELUM_PENGETESAN->getLabel()."'
-                END
-            "),
+            CASE
+                WHEN SUM(CASE WHEN penilaian = ? THEN 1 ELSE 0 END) >
+                     SUM(CASE WHEN penilaian = ? THEN 1 ELSE 0 END)
+                THEN ?
+                WHEN SUM(CASE WHEN penilaian = ? THEN 1 ELSE 0 END) <
+                     SUM(CASE WHEN penilaian = ? THEN 1 ELSE 0 END)
+                THEN ?
+                WHEN SUM(CASE WHEN penilaian = ? THEN 1 ELSE 0 END) =
+                     SUM(CASE WHEN penilaian = ? THEN 1 ELSE 0 END)
+                     AND SUM(CASE WHEN penilaian IN (?, ?) THEN 1 ELSE 0 END) > 0
+                THEN ?
+                ELSE ?
+            END", [
+                PenilaianKertosono::LULUS->value,  // First condition
+                PenilaianKertosono::TIDAK_LULUS->value,
+                HasilSistem::LULUS->getLabel(),
+
+                PenilaianKertosono::LULUS->value,  // Second condition
+                PenilaianKertosono::TIDAK_LULUS->value,
+                HasilSistem::TIDAK_LULUS_AKADEMIK->getLabel(),
+
+                PenilaianKertosono::LULUS->value,  // Third condition
+                PenilaianKertosono::TIDAK_LULUS->value,
+                PenilaianKertosono::LULUS->value,
+                PenilaianKertosono::TIDAK_LULUS->value,
+                HasilSistem::PERLU_MUSYAWARAH->getLabel(),
+
+                HasilSistem::BELUM_PENGETESAN->getLabel() // Default case
+            ])
+                ->whereColumn('tes_santri_id', 'tes_santri.id'),
         ]);
     }
 

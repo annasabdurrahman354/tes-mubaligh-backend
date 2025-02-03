@@ -151,7 +151,7 @@ class PesertaKediriController extends Controller
             'avg_nilai' => $peserta->avg_nilai,
             'hasil_sistem' => $peserta->hasil_sistem,
             'telah_disimak' => $telah_disimak,
-            'foto_smartcard' => $peserta->siswa->img_identitas,
+            'foto_smartcard' => $peserta->siswa->urlFotoIdentitas,
             'akhlak' => $this->transformAkhlak($peserta->akhlak),
             'akademik' => $this->transformAkademik($peserta->akademik),
         ];

@@ -15,7 +15,7 @@ class AkhlakKediriController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'peserta_kediri_id' => 'required|exists:peserta_kediri,id',
+            'tes_santri_id' => 'required|exists:tes_santri_id,id',
             'poin' => 'required|numeric|min:0|max:100',
             'catatan' => 'nullable|string|max:255',
         ]);
@@ -35,7 +35,7 @@ class AkhlakKediriController extends Controller
     public function index(Request $request)
     {
         $data = QueryBuilder::for(AkhlakKediri::class)
-            ->allowedFilters(['peserta_kediri_id', 'guru_id'])
+            ->allowedFilters(['tes_santri_id', 'guru_id'])
             ->get();
 
         return response()->json(["message" => "Data nilai akhlak berhasil diambil.", "data" => $data], 200);

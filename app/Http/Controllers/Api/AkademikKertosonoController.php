@@ -15,7 +15,7 @@ class AkademikKertosonoController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'peserta_kertosono_id' => 'required|exists:peserta_kertosono,id',
+            'tes_santri_id' => 'required|exists:tes_santri,id',
             'penilaian' => 'required',
             'kekurangan_tajwid' => 'nullable',
             'kekurangan_khusus' => 'nullable',
@@ -30,7 +30,7 @@ class AkademikKertosonoController extends Controller
 
         $akademikKertosono = AkademikKertosono::updateOrCreate(
             [
-                'peserta_kertosono_id' => $validated['peserta_kertosono_id'],
+                'tes_santri_id' => $validated['tes_santri_id'],
                 'guru_id' => $validated['guru_id'],
             ],
             $validated
@@ -45,7 +45,7 @@ class AkademikKertosonoController extends Controller
     public function index(Request $request)
     {
         $data = QueryBuilder::for(AkademikKertosono::class)
-            ->allowedFilters(['peserta_kediri_id', 'guru_id'])
+            ->allowedFilters(['tes_santri_id', 'guru_id'])
             ->get();
 
         return response()->json(["message" => "Data nilai akademik berhasil diambil!", "data" => $data], 200);

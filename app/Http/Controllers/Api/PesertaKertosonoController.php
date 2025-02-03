@@ -117,7 +117,7 @@ class PesertaKertosonoController extends Controller
             'count_tidak_lulus' => $peserta->count_tidak_lulus,
             'hasil_sistem' => $peserta->hasil_sistem,
             'telah_disimak' => $telah_disimak,
-            'foto_smartcard' => $peserta->siswa->img_identitas,
+            'foto_smartcard' => $peserta->siswa->urlFotoIdentitas,
             'akhlak' => $this->transformAkhlak($peserta->akhlak),
             'akademik' => $this->transformAkademik($peserta->akademik),
         ];
