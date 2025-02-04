@@ -66,9 +66,13 @@ class PesertaKediriController extends Controller
                     $pesertaQuery->having('hasil_sistem', HasilSistem::TIDAK_LULUS_AKADEMIK->getLabel());
                     break;
             }
+        } else {
+            // Only take 30 records when there's no filter
+            $pesertaQuery->take(30);
         }
 
-        $peserta = $pesertaQuery->take(30)->get()
+
+        $peserta = $pesertaQuery->get()
             ->map(fn($peserta) => $this->transformPeserta($peserta, $request));
 
         return response()->json($peserta);
