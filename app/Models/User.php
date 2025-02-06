@@ -323,7 +323,8 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasName, 
                 ->label('Jenis Kelamin')
                 ->options(JenisKelamin::class)
                 ->grouped()
-                ->inline(),
+                ->inline()
+                ->required(),
             TextInput::make('email')
                 ->label('Email')
                 ->email()
