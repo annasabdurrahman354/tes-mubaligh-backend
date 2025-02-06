@@ -7,7 +7,7 @@ use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
 
-class RekapKinerjaKertosonoExporter extends Exporter
+class RekapKinerjaKediriExporter extends Exporter
 {
     protected static ?string $model = User::class;
 
@@ -20,20 +20,14 @@ class RekapKinerjaKertosonoExporter extends Exporter
             ExportColumn::make('nama')
                 ->label('Nama'),
 
-            ExportColumn::make('jumlah_penyimakan_putra_kertosono')
+            ExportColumn::make('jumlah_penyimakan_putra_kediri')
                 ->label('Penyimakan Putra'),
 
-            ExportColumn::make('jumlah_penyimakan_putri_kertosono')
+            ExportColumn::make('jumlah_penyimakan_putri_kediri')
                 ->label('Penyimakan Putri'),
 
-            ExportColumn::make('total_penyimakan_kertosono')
+            ExportColumn::make('total_penyimakan_kediri')
                 ->label('Total Penyimakan'),
-
-            ExportColumn::make('total_durasi_penilaian_kertosono')
-                ->label('Total Durasi Penilaian'),
-
-            ExportColumn::make('rata_rata_durasi_penilaian_kertosono')
-                ->label('Rata-rata Durasi Penilaian'),
         ];
     }
 
@@ -42,7 +36,7 @@ class RekapKinerjaKertosonoExporter extends Exporter
         $periode_pengetesan_id = getPeriodeTes();
         $periode = getYearAndMonthName($periode_pengetesan_id);
 
-        $body = 'Data hasil kinerja guru Kertosono periode '.$periode['monthName'].' '.$periode['year'].' sejumlah ' . number_format($export->successful_rows) . ' ' . str('row')->plural($export->successful_rows) . ' baris berhasil diekspor.';
+        $body = 'Data hasil kinerja guru Kediri periode '.$periode['monthName'].' '.$periode['year'].' sejumlah ' . number_format($export->successful_rows) . ' ' . str('row')->plural($export->successful_rows) . ' baris berhasil diekspor.';
 
 
         if ($failedRowsCount = $export->getFailedRowsCount()) {

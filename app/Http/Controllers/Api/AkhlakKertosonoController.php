@@ -16,8 +16,8 @@ class AkhlakKertosonoController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'tes_santri_id' => 'required|exists:tes_santri_id,id',
-            'catatan' => 'nullable|string|max:255',
+            'tes_santri_id' => 'required|exists:tes_santri,id',
+            'catatan' => 'string|max:255',
         ]);
 
         $validated['guru_id'] = Auth::id();

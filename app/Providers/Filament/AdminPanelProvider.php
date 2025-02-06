@@ -41,6 +41,7 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogo(fn (PengaturanSitus $settings) => Storage::url($settings->brand_logo))
             ->brandLogoHeight(fn (PengaturanSitus $settings) => $settings->brand_logoHeight)
             ->colors(fn (PengaturanSitus $settings) => $settings->site_theme)
+            ->sidebarCollapsibleOnDesktop()
             ->databaseNotifications()->databaseNotificationsPolling('30s')
             ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')

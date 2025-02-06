@@ -2,7 +2,7 @@
 
 namespace App\Filament\Pages;
 
-use App\Filament\Exports\RekapKinerjaKertosonoExporter;
+use App\Filament\Exports\RekapKinerjaKediriExporter;
 use App\Models\User;
 use Filament\Pages\Page;
 use Filament\Tables\Actions\ExportAction;
@@ -13,17 +13,17 @@ use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
 use Illuminate\Database\Query\Builder;
 
-class RekapKinerjaKertosono extends Page implements HasTable
+class RekapKinerjaKediri extends Page implements HasTable
 {
     use InteractsWithTable;
 
-    protected static ?string $slug = 'rekap-kinerja-kertosono';
-    protected static ?string $title = 'Rekap Kinerja Kertosono';
+    protected static ?string $slug = 'rekap-kinerja-kediri';
+    protected static ?string $title = 'Rekap Kinerja Kediri';
     protected static ?string $navigationLabel = 'Rekap Kinerja';
-    protected static ?string $navigationGroup = 'Pengetesan Kertosono';
+    protected static ?string $navigationGroup = 'Pengetesan Kediri';
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
-    protected static string $view = 'filament.pages.rekap-kinerja-kertosono';
+    protected static string $view = 'filament.pages.rekap-kinerja-kediri';
 
     public function table(Table $table): Table
     {
@@ -35,7 +35,7 @@ class RekapKinerjaKertosono extends Page implements HasTable
                 User::query()
                     ->with(['roles'])
                     ->whereHas('roles', function ($query) {
-                        $query->where('name', 'Guru Kertosono');
+                        $query->where('name', 'Guru Kediri');
                     })
             )
             ->description(fn() => 'Rekap Kinerja Tes Periode '.$periode['monthName'].' '.$periode['year'])
@@ -55,20 +55,14 @@ class RekapKinerjaKertosono extends Page implements HasTable
                     ->sortable()
                     ->searchable(),
 
-                TextColumn::make('jumlah_penyimakan_putra_kertosono')
+                TextColumn::make('jumlah_penyimakan_putra_kediri')
                     ->label('Penyimakan Putra'),
 
-                TextColumn::make('jumlah_penyimakan_putri_kertosono')
+                TextColumn::make('jumlah_penyimakan_putri_kediri')
                     ->label('Penyimakan Putri'),
 
-                TextColumn::make('total_penyimakan_kertosono')
+                TextColumn::make('total_penyimakan_kediri')
                     ->label('Total Penyimakan'),
-
-                TextColumn::make('total_durasi_penilaian_kertosono')
-                    ->label('Total Durasi Penilaian'),
-
-                TextColumn::make('rata_rata_durasi_penilaian_kertosono')
-                    ->label('Rata-rata Durasi Penilaian'),
             ])
             ->defaultSort('username')
             ->filters([
@@ -80,10 +74,10 @@ class RekapKinerjaKertosono extends Page implements HasTable
             ->headerActions([
                 ExportAction::make()
                     ->label('Ekspor')
-                    ->exporter(RekapKinerjaKertosonoExporter::class)
+                    ->exporter(RekapKinerjaKediriExporter::class)
                     ->modifyQueryUsing(fn (Builder $query) => $query->with(['roles'])
                         ->whereHas('roles', function ($query) {
-                            $query->where('name', 'Guru Kertosono');
+                            $query->where('name', 'Guru Kediri');
                         })
                     )
             ])

@@ -7,6 +7,7 @@ use App\Enums\JenisKelamin;
 use App\Enums\KelompokKediri;
 use App\Enums\StatusKelanjutanKediri;
 use App\Enums\StatusTesKediri;
+use App\Filament\Exports\HasilTesKediriExporter;
 use App\Models\PesertaKediri;
 use Awcodes\TableRepeater\Components\TableRepeater;
 use Awcodes\TableRepeater\Header;
@@ -15,6 +16,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Pages\Page;
 use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\ExportAction;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
@@ -189,7 +191,10 @@ class HasilTesKediri extends Page implements HasTable
                             ->where('periode_id', $periode_pengetesan_id)
                             ->whereNotIn('status_tes', [
                                 StatusTesKediri::PRA_TES->value,
-                                StatusTesKediri::DITOLAK->value,
+                                StatusTesKediri::APPROVED_MATERI->value,
+                                StatusTesKediri::APPROVED_BARANG->value,
+                                StatusTesKediri::REJECTED_MATERI->value,
+                                StatusTesKediri::REJECTED_BARANG->value,
                                 StatusTesKediri::TUNDA->value,
                             ])
                             ->update([
@@ -226,6 +231,33 @@ class HasilTesKediri extends Page implements HasTable
                     ->color('danger')
                     ->icon('heroicon-o-exclamation-circle')
                     ->requiresConfirmation(),
+                Action::make('reset_hasil_sistem')
+                    ->label('Reset Hasil')
+                    ->action(function () use ($periode_pengetesan_id): void {
+                        PesertaKediri::where('periode_id', $periode_pengetesan_id)
+                            ->whereNotIn('status_tes', [
+                                StatusTesKediri::PRA_TES->value,
+                                StatusTesKediri::APPROVED_BARANG->value,
+                                StatusTesKediri::APPROVED_MATERI->value,
+                                StatusTesKediri::REJECTED_BARANG->value,
+                                StatusTesKediri::REJECTED_MATERI->value,
+                                StatusTesKediri::TUNDA->value
+                            ])
+                            ->update([
+                                'status_tes' => StatusTesKediri::AKTIF->value,
+                                'status_kelanjutan' => null,
+                            ]);
+                    })
+                    ->color('danger')
+                    ->icon('heroicon-o-exclamation-circle')
+                    ->requiresConfirmation(),
+                ExportAction::make()
+                    ->label('Ekspor')
+                    ->exporter(HasilTesKediriExporter::class)
+                    ->modifyQueryUsing(fn (Builder $query) => $query->with('siswa')
+                        ->withHasilSistem()
+                        ->where('periode_id', $periode_pengetesan_id)
+                    )
             ])
             ->actions([
                 Action::make('ubah_status_tes')

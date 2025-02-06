@@ -87,6 +87,14 @@ class HasilTesKertosono extends Page implements HasTable
                     ->label('Tidak Lulus')
                     ->sortable(),
 
+                TextColumn::make('akademik_count')
+                    ->label('Direkomendasikan')
+                    ->counts(['akademik' => fn ($query) => $query->where('rekomendasi_penarikan', true)])
+                    ->formatStateUsing(function (PesertaKertosono $record) {
+                        return $record->rekomendasi_guru;
+                    })
+                    ->sortable(),
+
                 TextColumn::make('hasil_sistem')
                     ->label('Hasil Sistem')
                     ->badge()
@@ -303,7 +311,7 @@ class HasilTesKertosono extends Page implements HasTable
                                         ELSE status_tes
                                     END
                                 "),
-                                                        'status_kelanjutan' => DB::raw("
+                                    'status_kelanjutan' => DB::raw("
                                     CASE
                                         WHEN (
                                             (SELECT COUNT(*) FROM tes_akademik_kertosono
@@ -339,6 +347,7 @@ class HasilTesKertosono extends Page implements HasTable
                         PesertaKertosono::where('periode_id', $periode_pengetesan_id)
                             ->whereNotIn('status_tes', [
                                 StatusTesKertosono::TUNDA->value,
+                                StatusTesKertosono::PRA_TES->value,
                             ])
                             ->update([
                                 'status_tes' => StatusTesKertosono::AKTIF->value,

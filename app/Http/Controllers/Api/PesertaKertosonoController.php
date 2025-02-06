@@ -70,7 +70,7 @@ class PesertaKertosonoController extends Controller
             $pesertaQuery->take(30);
         }
 
-        $peserta = $pesertaQuery->get()
+        $peserta = $pesertaQuery->orderByRaw('CAST(nomor_cocard AS UNSIGNED) ASC')->get()
             ->map(fn($peserta) => $this->transformPeserta($peserta, $request));
 
         return response()->json($peserta);
@@ -90,7 +90,7 @@ class PesertaKertosonoController extends Controller
         $currentUserId = $request->user()->id;
         $tanggalLahir = $peserta->siswa->tanggal_lahir;
         $umur = Carbon::parse($tanggalLahir)->age;
-        $pendidikan = $peserta->siswa->jurusan ? $peserta->siswa->pendidikan . ' - ' . $peserta->siswa->jurusan : $peserta->siswa->pendidikan;
+        $pendidikan = $peserta->siswa->jurusan != null && $peserta->siswa->jurusan != '' ? $peserta->siswa->pendidikan . ' - ' . $peserta->siswa->jurusan : $peserta->siswa->pendidikan;
         $telah_disimak = $peserta->akademik->contains(fn($akademik) => $akademik->guru_id === $currentUserId);
 
         return [

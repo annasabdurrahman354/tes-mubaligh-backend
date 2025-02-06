@@ -40,7 +40,7 @@ class PesertaKediri extends Model
     protected $casts = [
         'nomor_cocard' => 'integer',
         'tahap' => Tahap::class,
-        'kelompok' => KelompokKediri::class,
+        //'kelompok' => KelompokKediri::class,
         'status_tes' => StatusTes::class,
         'status_kelanjutan' => StatusKelanjutan::class,
     ];
@@ -73,7 +73,7 @@ class PesertaKediri extends Model
     protected function asalPondokNama(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->ponpes->n_ponpes
+            get: fn () => $this->ponpes->n_ponpes." (".$this->ponpes->daerah->n_daerah.")"
         );
     }
 

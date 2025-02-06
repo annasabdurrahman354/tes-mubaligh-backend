@@ -72,7 +72,7 @@ class PesertaKertosono extends Model
     protected function asalPondokNama(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->ponpes->n_ponpes
+            get: fn () => $this->ponpes->n_ponpes." (".$this->ponpes->daerah->n_daerah.")"
         );
     }
 
@@ -99,6 +99,19 @@ class PesertaKertosono extends Model
     public function akademik()
     {
         return $this->hasMany(AkademikKertosono::class, 'tes_santri_id');
+    }
+
+    public function rekomendasiGuru(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->akademik()
+                ->where('rekomendasi_penarikan', 1)
+                ->with('guru')
+                ->get()
+                ->pluck('guru.nama')
+                ->unique()
+                ->implode(', ')
+        );
     }
 
     protected function allKekurangan(): Attribute

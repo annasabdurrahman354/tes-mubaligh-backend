@@ -26,7 +26,19 @@ class PesertaKediriController extends Controller
             ->where('periode_id', $periode_pengetesan_id)
             ->tap(fn($query) => $query->withHasilSistem()) // Ensures scope is applied
             ->with(['siswa']) // Eager loading siswa for performance
-            ->withCount('akademik'); // Count related akademik records
+            ->orderBy(function ($query) {
+                $query->select('jenis_kelamin')
+                    ->from('tb_personal_data3')
+                    ->whereColumn('tb_personal_data3.nispn', 'tes_santri.nispn')
+                    ->limit(1);
+            })
+            ->orderBy(function ($query) {
+                $query->select('nama_lengkap')
+                    ->from('tb_personal_data3')
+                    ->whereColumn('tb_personal_data3.nispn', 'tes_santri.nispn')
+                    ->limit(1);
+            })
+            ->withCount('akademik');
 
 
         // Apply filters based on request parameters
@@ -121,7 +133,7 @@ class PesertaKediriController extends Controller
         $currentUserId = $request->user()->id;
         $tanggalLahir = $peserta->siswa->tanggal_lahir ?? null;
         $umur = $tanggalLahir ? Carbon::parse($tanggalLahir)->age : null;
-        $pendidikan = $peserta->siswa->jurusan ? $peserta->siswa->pendidikan . ' - ' . $peserta->siswa->jurusan : $peserta->siswa->pendidikan;
+        $pendidikan = $peserta->siswa->jurusan != null && $peserta->siswa->jurusan != '' ? $peserta->siswa->pendidikan . ' - ' . $peserta->siswa->jurusan : $peserta->siswa->pendidikan;
         $telah_disimak = $peserta->akademik->contains(fn($akademik) => $akademik->guru_id === $currentUserId);
 
         return [
