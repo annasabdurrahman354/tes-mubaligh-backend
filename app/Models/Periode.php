@@ -56,14 +56,14 @@ class Periode extends Model
             // Counting Male and Female participants per status
             'pesertaKediri as count_pra_tes_male' => function ($query) use ($baseQuery) {
                 $baseQuery($query);
-                $query->where('status_tes', StatusTesKediri::PRA_TES)
+                $query->where('status_tes', StatusTesKediri::PRA_TES->value)
                     ->whereHas('siswa', function ($q) {
                         $q->where('jenis_kelamin', 'L');
                     });
             },
             'pesertaKediri as count_pra_tes_female' => function ($query) use ($baseQuery) {
                 $baseQuery($query);
-                $query->where('status_tes', StatusTesKediri::PRA_TES)
+                $query->where('status_tes', StatusTesKediri::PRA_TES->value)
                     ->whereHas('siswa', function ($q) {
                         $q->where('jenis_kelamin', 'P');
                     });
@@ -71,14 +71,14 @@ class Periode extends Model
 
             'pesertaKediri as count_rejected_barang_male' => function ($query) use ($baseQuery) {
                 $baseQuery($query);
-                $query->where('status_tes', StatusTesKediri::REJECTED_BARANG)
+                $query->where('status_tes', StatusTesKediri::REJECTED_BARANG->value)
                     ->whereHas('siswa', function ($q) {
                         $q->where('jenis_kelamin', 'L');
                     });
             },
             'pesertaKediri as count_rejected_barang_female' => function ($query) use ($baseQuery) {
                 $baseQuery($query);
-                $query->where('status_tes', StatusTesKediri::REJECTED_BARANG)
+                $query->where('status_tes', StatusTesKediri::REJECTED_BARANG->value)
                     ->whereHas('siswa', function ($q) {
                         $q->where('jenis_kelamin', 'P');
                     });
@@ -86,14 +86,14 @@ class Periode extends Model
 
             'pesertaKediri as count_rejected_materi_male' => function ($query) use ($baseQuery) {
                 $baseQuery($query);
-                $query->where('status_tes', StatusTesKediri::REJECTED_MATERI)
+                $query->where('status_tes', StatusTesKediri::REJECTED_MATERI->value)
                     ->whereHas('siswa', function ($q) {
                         $q->where('jenis_kelamin', 'L');
                     });
             },
             'pesertaKediri as count_rejected_materi_female' => function ($query) use ($baseQuery) {
                 $baseQuery($query);
-                $query->where('status_tes', StatusTesKediri::REJECTED_MATERI)
+                $query->where('status_tes', StatusTesKediri::REJECTED_MATERI->value)
                     ->whereHas('siswa', function ($q) {
                         $q->where('jenis_kelamin', 'P');
                     });
@@ -101,14 +101,14 @@ class Periode extends Model
 
             'pesertaKediri as count_tunda_male' => function ($query) use ($baseQuery) {
                 $baseQuery($query);
-                $query->where('status_tes', StatusTesKediri::TUNDA)
+                $query->where('status_tes', StatusTesKediri::TUNDA->value)
                     ->whereHas('siswa', function ($q) {
                         $q->where('jenis_kelamin', 'L');
                     });
             },
             'pesertaKediri as count_tunda_female' => function ($query) use ($baseQuery) {
                 $baseQuery($query);
-                $query->where('status_tes', StatusTesKediri::TUNDA)
+                $query->where('status_tes', StatusTesKediri::TUNDA->value)
                     ->whereHas('siswa', function ($q) {
                         $q->where('jenis_kelamin', 'P');
                     });
@@ -116,14 +116,14 @@ class Periode extends Model
 
             'pesertaKediri as count_aktif_male' => function ($query) use ($baseQuery) {
                 $baseQuery($query);
-                $query->where('status_tes', StatusTesKediri::AKTIF)
+                $query->where('status_tes', StatusTesKediri::AKTIF->value)
                     ->whereHas('siswa', function ($q) {
                         $q->where('jenis_kelamin', 'L');
                     });
             },
             'pesertaKediri as count_aktif_female' => function ($query) use ($baseQuery) {
                 $baseQuery($query);
-                $query->where('status_tes', StatusTesKediri::AKTIF)
+                $query->where('status_tes', StatusTesKediri::AKTIF->value)
                     ->whereHas('siswa', function ($q) {
                         $q->where('jenis_kelamin', 'P');
                     });
@@ -131,14 +131,14 @@ class Periode extends Model
 
             'pesertaKediri as count_lulus_male' => function ($query) use ($baseQuery) {
                 $baseQuery($query);
-                $query->where('status_tes', StatusTesKediri::LULUS)
+                $query->where('status_tes', StatusTesKediri::LULUS->value)
                     ->whereHas('siswa', function ($q) {
                         $q->where('jenis_kelamin', 'L');
                     });
             },
             'pesertaKediri as count_lulus_female' => function ($query) use ($baseQuery) {
                 $baseQuery($query);
-                $query->where('status_tes', StatusTesKediri::LULUS)
+                $query->where('status_tes', StatusTesKediri::LULUS->value)
                     ->whereHas('siswa', function ($q) {
                         $q->where('jenis_kelamin', 'P');
                     });
@@ -147,8 +147,8 @@ class Periode extends Model
             'pesertaKediri as count_tidak_lulus_male' => function ($query) use ($baseQuery) {
                 $baseQuery($query);
                 $query->where(function ($q) {
-                    $q->where('status_tes', StatusTesKediri::TIDAK_LULUS_AKHLAK)
-                        ->orWhere('status_tes', StatusTesKediri::TIDAK_LULUS_AKADEMIK);
+                    $q->where('status_tes', StatusTesKediri::TIDAK_LULUS_AKHLAK->value)
+                        ->orWhere('status_tes', StatusTesKediri::TIDAK_LULUS_AKADEMIK->value);
                 })
                     ->whereHas('siswa', function ($q) {
                         $q->where('jenis_kelamin', 'L');
@@ -157,8 +157,8 @@ class Periode extends Model
             'pesertaKediri as count_tidak_lulus_female' => function ($query) use ($baseQuery) {
                 $baseQuery($query);
                 $query->where(function ($q) {
-                    $q->where('status_tes', StatusTesKediri::TIDAK_LULUS_AKHLAK)
-                        ->orWhere('status_tes', StatusTesKediri::TIDAK_LULUS_AKADEMIK);
+                    $q->where('status_tes', StatusTesKediri::TIDAK_LULUS_AKHLAK->value)
+                        ->orWhere('status_tes', StatusTesKediri::TIDAK_LULUS_AKADEMIK->value);
                 })
                     ->whereHas('siswa', function ($q) {
                         $q->where('jenis_kelamin', 'P');
@@ -184,14 +184,14 @@ class Periode extends Model
             // Counting Male and Female participants per status
             'pesertaKertosono as count_pra_tes_male' => function ($query) use ($baseQuery) {
                 $baseQuery($query);
-                $query->where('status_tes', StatusTesKertosono::PRA_TES)
+                $query->where('status_tes', StatusTesKertosono::PRA_TES->value)
                     ->whereHas('siswa', function ($q) {
                         $q->where('jenis_kelamin', 'L');
                     });
             },
             'pesertaKertosono as count_pra_tes_female' => function ($query) use ($baseQuery) {
                 $baseQuery($query);
-                $query->where('status_tes', StatusTesKertosono::PRA_TES)
+                $query->where('status_tes', StatusTesKertosono::PRA_TES->value)
                     ->whereHas('siswa', function ($q) {
                         $q->where('jenis_kelamin', 'P');
                     });
@@ -199,14 +199,14 @@ class Periode extends Model
 
             'pesertaKertosono as count_tunda_male' => function ($query) use ($baseQuery) {
                 $baseQuery($query);
-                $query->where('status_tes', StatusTesKertosono::TUNDA)
+                $query->where('status_tes', StatusTesKertosono::TUNDA->value)
                     ->whereHas('siswa', function ($q) {
                         $q->where('jenis_kelamin', 'L');
                     });
             },
             'pesertaKertosono as count_tunda_female' => function ($query) use ($baseQuery) {
                 $baseQuery($query);
-                $query->where('status_tes', StatusTesKertosono::TUNDA)
+                $query->where('status_tes', StatusTesKertosono::TUNDA->value)
                     ->whereHas('siswa', function ($q) {
                         $q->where('jenis_kelamin', 'P');
                     });
@@ -214,14 +214,14 @@ class Periode extends Model
 
             'pesertaKertosono as count_aktif_male' => function ($query) use ($baseQuery) {
                 $baseQuery($query);
-                $query->where('status_tes', StatusTesKertosono::AKTIF)
+                $query->where('status_tes', StatusTesKertosono::AKTIF->value)
                     ->whereHas('siswa', function ($q) {
                         $q->where('jenis_kelamin', 'L');
                     });
             },
             'pesertaKertosono as count_aktif_female' => function ($query) use ($baseQuery) {
                 $baseQuery($query);
-                $query->where('status_tes', StatusTesKertosono::AKTIF)
+                $query->where('status_tes', StatusTesKertosono::AKTIF->value)
                     ->whereHas('siswa', function ($q) {
                         $q->where('jenis_kelamin', 'P');
                     });
@@ -229,14 +229,14 @@ class Periode extends Model
 
             'pesertaKertosono as count_lulus_male' => function ($query) use ($baseQuery) {
                 $baseQuery($query);
-                $query->where('status_tes', StatusTesKertosono::LULUS)
+                $query->where('status_tes', StatusTesKertosono::LULUS->value)
                     ->whereHas('siswa', function ($q) {
                         $q->where('jenis_kelamin', 'L');
                     });
             },
             'pesertaKertosono as count_lulus_female' => function ($query) use ($baseQuery) {
                 $baseQuery($query);
-                $query->where('status_tes', StatusTesKertosono::LULUS)
+                $query->where('status_tes', StatusTesKertosono::LULUS->value)
                     ->whereHas('siswa', function ($q) {
                         $q->where('jenis_kelamin', 'P');
                     });
@@ -245,8 +245,8 @@ class Periode extends Model
             'pesertaKertosono as count_tidak_lulus_male' => function ($query) use ($baseQuery) {
                 $baseQuery($query);
                 $query->where(function ($q) {
-                    $q->where('status_tes', StatusTesKertosono::TIDAK_LULUS_AKHLAK)
-                        ->orWhere('status_tes', StatusTesKertosono::TIDAK_LULUS_AKADEMIK);
+                    $q->where('status_tes', StatusTesKertosono::TIDAK_LULUS_AKHLAK->value)
+                        ->orWhere('status_tes', StatusTesKertosono::TIDAK_LULUS_AKADEMIK->value);
                 })
                     ->whereHas('siswa', function ($q) {
                         $q->where('jenis_kelamin', 'L');
@@ -255,8 +255,8 @@ class Periode extends Model
             'pesertaKertosono as count_tidak_lulus_female' => function ($query) use ($baseQuery) {
                 $baseQuery($query);
                 $query->where(function ($q) {
-                    $q->where('status_tes', StatusTesKertosono::TIDAK_LULUS_AKHLAK)
-                        ->orWhere('status_tes', StatusTesKertosono::TIDAK_LULUS_AKADEMIK);
+                    $q->where('status_tes', StatusTesKertosono::TIDAK_LULUS_AKHLAK->value)
+                        ->orWhere('status_tes', StatusTesKertosono::TIDAK_LULUS_AKADEMIK->value);
                 })
                     ->whereHas('siswa', function ($q) {
                         $q->where('jenis_kelamin', 'P');
@@ -265,14 +265,14 @@ class Periode extends Model
 
             'pesertaKertosono as count_perlu_musyawarah_male' => function ($query) use ($baseQuery) {
                 $baseQuery($query);
-                $query->where('status_tes', StatusTesKertosono::PERLU_MUSYAWARAH)
+                $query->where('status_tes', StatusTesKertosono::PERLU_MUSYAWARAH->value)
                     ->whereHas('siswa', function ($q) {
                         $q->where('jenis_kelamin', 'L');
                     });
             },
             'pesertaKertosono as count_perlu_musyawarah_female' => function ($query) use ($baseQuery) {
                 $baseQuery($query);
-                $query->where('status_tes', StatusTesKertosono::PERLU_MUSYAWARAH)
+                $query->where('status_tes', StatusTesKertosono::PERLU_MUSYAWARAH->value)
                     ->whereHas('siswa', function ($q) {
                         $q->where('jenis_kelamin', 'P');
                     });
