@@ -21,7 +21,7 @@ class RekapKinerjaKertosono extends Page implements HasTable
     protected static ?string $title = 'Rekap Kinerja Kertosono';
     protected static ?string $navigationLabel = 'Rekap Kinerja';
     protected static ?string $navigationGroup = 'Pengetesan Kertosono';
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static ?string $navigationIcon = 'heroicon-o-trophy';
 
     protected static string $view = 'filament.pages.rekap-kinerja-kertosono';
 
@@ -46,7 +46,7 @@ class RekapKinerjaKertosono extends Page implements HasTable
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('username')
-                    ->label('')
+                    ->label('Username')
                     ->sortable()
                     ->searchable(),
 
@@ -68,7 +68,8 @@ class RekapKinerjaKertosono extends Page implements HasTable
                     ->label('Total Durasi Penilaian'),
 
                 TextColumn::make('rata_rata_durasi_penilaian_kertosono')
-                    ->label('Rata-rata Durasi Penilaian'),
+                    ->label('Rata-rata Durasi Penilaian')
+                    ->formatStateUsing(fn($state) => number_format($state, 2) . ' menit'),
             ])
             ->defaultSort('username')
             ->filters([
@@ -89,7 +90,8 @@ class RekapKinerjaKertosono extends Page implements HasTable
             ])
             ->bulkActions([
 
-            ]);
+            ])
+            ->striped();
     }
 
 }

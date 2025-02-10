@@ -160,7 +160,9 @@ class PeranResource extends Resource
             ])
             ->bulkActions([
 
-            ]);
+            ])
+            ->selectCurrentPageOnly()
+            ->striped();
     }
 
     public static function getRelations(): array

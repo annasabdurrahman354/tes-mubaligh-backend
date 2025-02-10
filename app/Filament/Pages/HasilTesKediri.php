@@ -373,7 +373,7 @@ class HasilTesKediri extends Page implements HasTable
                     })
             ])
             ->bulkActions([
-
-            ]);
+            ])
+            ->striped();
     }
 }

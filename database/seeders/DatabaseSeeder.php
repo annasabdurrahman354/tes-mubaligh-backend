@@ -56,7 +56,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RolesAndPermissionsSeeder::class,
             UsersTableSeeder::class,
-            //SiswaTableSeeder::class
+            SiswaTableSeeder::class
         ]);
 
         $panels = Filament::getPanels();
@@ -68,8 +68,8 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        //$this->assignSiswaToPesertaKediri($thisMonthData['id_periode']);
-        //$this->assignSiswaToPesertaKertosono($thisMonthData['id_periode']);
+        $this->assignSiswaToPesertaKediri($thisMonthData['id_periode']);
+        $this->assignSiswaToPesertaKertosono($thisMonthData['id_periode']);
     }
 
     private function assignSiswaToPesertaKediri(string $periodeId): void

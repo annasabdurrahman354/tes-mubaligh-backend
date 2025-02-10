@@ -50,7 +50,8 @@ class ProvinsiResource extends Resource
                         ->requiresConfirmation(),
                 ]),
             ])
-            ->selectCurrentPageOnly();
+            ->selectCurrentPageOnly()
+            ->striped();
     }
 
     public static function getRelations(): array

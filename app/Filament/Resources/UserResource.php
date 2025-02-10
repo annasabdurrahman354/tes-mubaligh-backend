@@ -49,7 +49,9 @@ class UserResource extends Resource
                     Tables\Actions\ForceDeleteBulkAction::make(),
                     Tables\Actions\RestoreBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->selectCurrentPageOnly()
+            ->striped();
     }
 
     public static function getRelations(): array

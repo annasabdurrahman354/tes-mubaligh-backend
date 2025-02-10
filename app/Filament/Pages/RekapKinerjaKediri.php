@@ -21,7 +21,7 @@ class RekapKinerjaKediri extends Page implements HasTable
     protected static ?string $title = 'Rekap Kinerja Kediri';
     protected static ?string $navigationLabel = 'Rekap Kinerja';
     protected static ?string $navigationGroup = 'Pengetesan Kediri';
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static ?string $navigationIcon = 'heroicon-o-trophy';
 
     protected static string $view = 'filament.pages.rekap-kinerja-kediri';
 
@@ -46,7 +46,7 @@ class RekapKinerjaKediri extends Page implements HasTable
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('username')
-                    ->label('')
+                    ->label('Username')
                     ->sortable()
                     ->searchable(),
 
@@ -83,7 +83,8 @@ class RekapKinerjaKediri extends Page implements HasTable
             ])
             ->bulkActions([
 
-            ]);
+            ])
+            ->striped();
     }
 
 }

@@ -11,6 +11,7 @@ use Filament\Forms\Components\ToggleButtons;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
 use Filament\Models\Contracts\HasName;
+use Filament\Panel;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -60,6 +61,11 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasName, 
     protected $casts = [
         'jenis_kelamin' => JenisKelamin::class,
     ];
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $this->hasRole([\App\Enums\Role::SUPER_ADMIN->value, \App\Enums\Role::ADMIN_KEDIRI->value, \App\Enums\Role::ADMIN_KERTOSONO->value]);
+    }
 
     protected function recordTitle(): Attribute
     {

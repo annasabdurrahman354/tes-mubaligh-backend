@@ -45,7 +45,9 @@ class AkademikKertosonoResource extends Resource
                     Tables\Actions\DeleteBulkAction::make()
                         ->requiresConfirmation()
                 ]),
-            ]);
+            ])
+            ->selectCurrentPageOnly()
+            ->striped();
     }
 
     public static function getRelations(): array

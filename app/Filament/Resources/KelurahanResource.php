@@ -52,7 +52,8 @@ class KelurahanResource extends Resource
                         ->requiresConfirmation(),
                 ]),
             ])
-            ->selectCurrentPageOnly();
+            ->selectCurrentPageOnly()
+            ->striped();
     }
 
     public static function getRelations(): array

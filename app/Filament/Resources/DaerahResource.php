@@ -42,7 +42,9 @@ class DaerahResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     //Tables\Actions\ForceDeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->selectCurrentPageOnly()
+            ->striped();
     }
 
     public static function getRelations(): array

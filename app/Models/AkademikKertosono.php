@@ -193,6 +193,9 @@ class AkademikKertosono extends Model
                                 ->where('guru_id', $get('guru_id'))
                                 ->where('tes_santri_id', $state);
                         })
+                        ->validationMessages([
+                            'unique' => 'Santri sudah dinilai oleh guru tersebut.',
+                        ])
                         ->required()
                         ->disabledOn('edit'),
                     Forms\Components\Select::make('guru_id')

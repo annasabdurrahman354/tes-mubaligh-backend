@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Enums\HasilSistem;
-use App\Enums\KelompokKediri;
 use App\Enums\StatusKelanjutan;
 use App\Enums\StatusKelanjutanKediri;
 use App\Enums\StatusTes;
@@ -60,6 +59,13 @@ class PesertaKediri extends Model
 
         return Attribute::make(
             get: fn () => $riwayat_tes,
+        );
+    }
+
+    protected function totalPoinAkhlak(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->akhlak()->sum('poin')
         );
     }
 
@@ -289,13 +295,23 @@ class PesertaKediri extends Model
                         ->unique(ignoreRecord: true, modifyRuleUsing: function (Unique $rule, Get $get, $state) {
                             return $rule
                                 ->where('periode_id', $get('periode_id'))
-                                ->where('nispn', $state);
-                        }),
+                                ->where('nispn', $state)
+                                ->where('tahap', Tahap::KEDIRI->value);
+                        })
+                        ->validationMessages([
+                            'unique' => 'Santri sudah terdaftar tes kediri di periode tersebut.',
+                        ]),
                     TextInput::make('kelompok')
                         ->label('Kelompok'),
                     TextInput::make('nomor_cocard')
                         ->label('Nomor Cocard')
                         ->numeric(),
+                    Select::make('ponpes_id')
+                        ->label('Asal Pondok')
+                        ->relationship('ponpes', 'n_ponpes')
+                        ->preload()
+                        ->searchable()
+                        ->required(),
                 ]),
 
             Section::make('Status Tes')

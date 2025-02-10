@@ -42,7 +42,9 @@ class PeriodeResource extends Resource
                     //Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])
-            ->defaultSort('id_periode');
+            ->defaultSort('id_periode')
+            ->selectCurrentPageOnly()
+            ->striped();
     }
 
     public static function getRelations(): array

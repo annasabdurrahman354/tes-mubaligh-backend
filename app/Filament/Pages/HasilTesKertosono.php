@@ -201,6 +201,7 @@ class HasilTesKertosono extends Page implements HasTable
                                 TextInput::make('catatan')
                                     ->disabled(),
                                 TextInput::make('durasi_penilaian')
+                                    ->formatStateUsing(fn($state) => number_format($state, 2) . ' menit')
                                     ->disabled(),
                             ])
                             ->deletable(false)
@@ -367,7 +368,8 @@ class HasilTesKertosono extends Page implements HasTable
             ])
             ->bulkActions([
 
-            ]);
+            ])
+            ->striped();
     }
 
 }

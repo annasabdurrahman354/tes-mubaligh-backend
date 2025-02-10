@@ -15,6 +15,7 @@ export default {
         './vendor/filament/**/*.blade.php',
         './vendor/bezhansalleh/filament-exceptions/resources/views/**/*.blade.php',
         './vendor/awcodes/filament-table-repeater/resources/**/*.blade.php',
+        './vendor/codewithdennis/filament-simple-alert/resources/**/*.blade.php',
     ],
     theme: {
         extend: {

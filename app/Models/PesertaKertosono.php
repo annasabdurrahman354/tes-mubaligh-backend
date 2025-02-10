@@ -321,10 +321,25 @@ class PesertaKertosono extends Model
                         ->label('Siswa')
                         ->relationship('siswa', 'nama_lengkap')
                         ->searchable()
-                        ->required(),
+                        ->required()
+                        ->unique(ignoreRecord: true, modifyRuleUsing: function (Unique $rule, Get $get, $state) {
+                            return $rule
+                                ->where('periode_id', $get('periode_id'))
+                                ->where('nispn', $state)
+                                ->where('tahap', Tahap::KERTOSONO->value);
+                        })
+                        ->validationMessages([
+                            'unique' => 'Santri sudah terdaftar tes kediri di periode tersebut.',
+                        ]),
                     TextInput::make('nomor_cocard')
                         ->label('Nomor Cocard')
                         ->numeric(),
+                    Select::make('ponpes_id')
+                        ->label('Asal Pondok')
+                        ->relationship('ponpes', 'n_ponpes')
+                        ->preload()
+                        ->searchable()
+                        ->required(),
                 ]),
 
             Section::make('Status Tes')
