@@ -29,6 +29,7 @@ class Siswa extends Model implements HasMedia
     protected $primaryKey = 'nik';
     public $incrementing = false;
     protected $keyType = 'string';
+    public $timestamps = false;
 
     protected $fillable = [
         'nik', 'nispn', 'nis', 'nisn', 'kk', 'rfid', 'nama_lengkap', 'nama_panggilan',

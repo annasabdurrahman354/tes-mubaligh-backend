@@ -17,8 +17,8 @@ class Kota extends Model
     use HasFactory;
 
     protected $table = 'tb_kota_kab';
-
     protected $primaryKey = 'id_kota_kab';
+    public $timestamps = false;
 
     protected $fillable = [
         'nama',

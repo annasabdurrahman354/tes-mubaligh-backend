@@ -13,8 +13,9 @@ class Daerah extends Model
     use HasFactory;
 
     protected $table = 'tb_daerah';
-
     protected $primaryKey = 'id_daerah';
+    public $timestamps = false;
+
 
     protected $fillable = [
         'n_daerah',

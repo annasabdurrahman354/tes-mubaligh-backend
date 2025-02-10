@@ -25,8 +25,8 @@ class Periode extends Model
     protected $table = 'tb_periode';
 
     protected $primaryKey = 'id_periode';
-
     public $incrementing = false;
+    public $timestamps = false;
 
     protected $fillable = [
         'id_periode',

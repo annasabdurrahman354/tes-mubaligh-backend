@@ -17,8 +17,8 @@ class Ponpes extends Model
     use HasFactory;
 
     protected $table = 'tb_ponpes';
-
     protected $primaryKey = 'id_ponpes';
+    public $timestamps = false;
 
     protected $fillable = [
         'id_daerah',

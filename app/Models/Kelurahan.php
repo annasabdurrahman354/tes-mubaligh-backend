@@ -14,8 +14,8 @@ class Kelurahan extends Model
     use HasFactory;
 
     protected $table = 'tb_desa_kel';
-
     protected $primaryKey = 'id_desa_kel';
+    public $timestamps = false;
 
     protected $fillable = [
         'nama',

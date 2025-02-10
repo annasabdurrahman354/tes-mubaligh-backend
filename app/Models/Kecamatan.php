@@ -17,8 +17,8 @@ class Kecamatan extends Model
     use HasFactory;
 
     protected $table = 'tb_kecamatan';
-
     protected $primaryKey = 'id_kecamatan';
+    public $timestamps = false;
 
     protected $fillable = [
         'nama',

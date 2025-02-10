@@ -15,8 +15,8 @@ class Provinsi extends Model
     use HasFactory;
 
     protected $table = 'tb_provinsi';
-
     protected $primaryKey = 'id_provinsi';
+    public $timestamps = false;
 
     protected $fillable = [
         'nama',
