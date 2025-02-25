@@ -11,11 +11,16 @@ class AuthController extends Controller
     /**
      * Login with username and password.
      */
-    public function loginWithCredential(Request $request)
+    public function loginByCredential(Request $request)
     {
         $request->validate([
-            'username' => 'required|string',
-            'password' => 'required|string',
+            'username' => ['required', 'string'],
+            'password' => ['required', 'string'],
+        ], [
+            'username.required' => 'Username wajib diisi.',
+            'username.string' => 'Username harus berupa teks.',
+            'password.required' => 'Password wajib diisi.',
+            'password.string' => 'Password harus berupa teks.',
         ]);
 
         $user = User::where('username', $request->username)->first();
@@ -34,15 +39,18 @@ class AuthController extends Controller
     }
 
     /**
-     * Login with NFC.
+     * Login with RFID.
      */
-    public function loginWithNfc(Request $request)
+    public function loginByRFID(Request $request)
     {
         $request->validate([
-            'nfc' => 'required|string',
+            'rfid' => ['required', 'string'],
+        ], [
+            'rfid.required' => 'Kode RFID wajib diisi.',
+            'rfid.string' => 'Kode RFID harus berupa teks.',
         ]);
 
-        $user = User::where('rfid', $request->nfc)->first();
+        $user = User::where('rfid', $request->rfid)->first();
 
         if (!$user) {
             return response()->json(['message' => 'Smartcard tidak terdata sebagai pengguna.'], 401);
@@ -96,7 +104,7 @@ class AuthController extends Controller
             'email' => $user->email,
             'nomor_telepon' => $user->nomor_telepon,
             'nik' => $user->nik,
-            'nfc' => $user->nfc,
+            'rfid' => $user->rfid,
             'pondok_id' => $user->pondok_id,
             'pondok_nama' => $user->pondok?->nama,
             'roles' => $user->roles->pluck('name')->toArray(),
@@ -107,7 +115,10 @@ class AuthController extends Controller
     public function updatePassword(Request $request)
     {
         $request->validate([
-            'password' => 'required|string', // Requires new_password and new_password_confirmation
+            'password' => ['required', 'string'],
+        ], [
+            'password.required' => 'Password baru wajib diisi.',
+            'password.string' => 'Password baru harus berupa teks.',
         ]);
 
         $user = $request->user();
@@ -118,5 +129,4 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'Password berhasil diperbarui.'], 200);
     }
-
 }

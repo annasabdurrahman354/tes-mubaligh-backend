@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class AkhlakKertosono extends Model
@@ -33,6 +34,18 @@ class AkhlakKertosono extends Model
         return Attribute::make(
             get: fn () => 'Akhlak '.$this->peserta->recordTitle,
         );
+    }
+
+    public function transform()
+    {
+        return [
+            'id' => $this->id,
+            'guru_id' => $this->guru_id,
+            'guru_nama' => $this->guru->nama ?? null,
+            'guru_foto' => $this->guru->getFilamentAvatarUrl(),
+            'catatan' => $this->catatan,
+            'created_at' => Carbon::parse($this->created_at)->translatedFormat('d F Y'),
+        ];
     }
 
     public function peserta()

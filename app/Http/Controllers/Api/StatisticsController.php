@@ -7,102 +7,90 @@ use App\Enums\StatusTes;
 use App\Enums\StatusTesKediri;
 use App\Enums\StatusTesKertosono;
 use App\Models\PesertaKediri;
-use App\Models\AkademikKediri;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Enums\JenisKelamin;
 use App\Models\PesertaKertosono;
-use App\Models\AkademikKertosono;
 
 class StatisticsController extends Controller
 {
-    public function getStatistikKediri(Request $request)
+    public function getStatistikPeserta($pesertaModel, $statusEnum)
     {
         $periode_pengetesan_id = getPeriodeTes();
         $periode = getYearAndMonthName($periode_pengetesan_id);
         $periode_tes = $periode['monthName'] . ' ' . $periode['year'];
 
-        // Base query to avoid duplication
-        $baseQuery = PesertaKediri::where('periode_id', $periode_pengetesan_id)
+        // Query utama
+        $baseQuery = $pesertaModel::where('periode_id', $periode_pengetesan_id)
             ->whereNotIn('status_tes', [
-                StatusTesKediri::PRA_TES->value,
-                StatusTesKediri::TUNDA->value
+                $statusEnum::PRA_TES->value,
+                $statusEnum::TUNDA->value
             ])
             ->withHasilSistem();
 
-        // Fetch data in one query to avoid multiple DB hits
+        // Ambil data
         $pesertaData = $baseQuery->with(['siswa', 'akademik'])->get();
 
-        // Compute overall stats
+        // Hitung statistik
         $overallStats = $this->calculateStats($pesertaData);
 
-        // Compute stats by gender
+        // Hitung statistik berdasarkan jenis kelamin
         $statsByGender = collect(JenisKelamin::cases())->mapWithKeys(function ($gender) use ($pesertaData) {
-            return [$gender->value => $this->calculateStats(
+            return [$gender->getLabel() => $this->calculateStats(
                 $pesertaData->where('siswa.jenis_kelamin', $gender)
             )];
         });
 
-        return response()->json([
-            'periode_tes' => $periode_tes,
-            'overall' => $overallStats,
-            'by_gender' => $statsByGender
-        ]);
-    }
+        $modelName =  $pesertaModel == PesertaKediri::class ? 'Kediri' : 'Kertosono';
 
+        return response()->json([
+            'message' => 'Data statistik tes '.$modelName.' berhasil diambil.',
+            'data' => [
+                'periode_tes' => $periode_tes,
+                'overall' => $overallStats,
+                'by_gender' => $statsByGender
+            ]
+        ], 200);
+    }
+    public function getStatistikKediri(Request $request)
+    {
+        return $this->getStatistikPeserta(PesertaKediri::class, StatusTesKediri::class);
+    }
 
     public function getStatistikKertosono(Request $request)
     {
-        $periode_pengetesan_id = getPeriodeTes();
-        $periode = getYearAndMonthName($periode_pengetesan_id);
-        $periode_tes = $periode['monthName'] . ' ' . $periode['year'];
-
-        // Base query to avoid duplication
-        $baseQuery = PesertaKertosono::where('periode_id', $periode_pengetesan_id)
-            ->whereNotIn('status_tes', [
-                StatusTesKertosono::PRA_TES->value,
-                StatusTesKertosono::TUNDA->value
-            ])
-            ->withHasilSistem();
-
-        // Fetch data in one query to avoid multiple DB hits
-        $pesertaData = $baseQuery->with(['siswa', 'akademik'])->get();
-
-        // Compute overall stats
-        $overallStats = $this->calculateStats($pesertaData);
-
-        // Compute stats by gender
-        $statsByGender = collect(JenisKelamin::cases())->mapWithKeys(function ($gender) use ($pesertaData) {
-            return [$gender->value => $this->calculateStats(
-                $pesertaData->where('siswa.jenis_kelamin', $gender)
-            )];
-        });
-
-        return response()->json([
-            'periode_tes' => $periode_tes,
-            'overall' => $overallStats,
-            'by_gender' => $statsByGender
-        ]);
+        return $this->getStatistikPeserta(PesertaKertosono::class, StatusTesKertosono::class);
     }
 
     private function calculateStats($pesertaData)
     {
-        $totalActive = $pesertaData->where('status_tes', StatusTesKediri::AKTIF->value)->count();
+        $totalActive = $pesertaData->where('status_tes', StatusTes::AKTIF->value)->count();
 
-        $akademikCounts = $pesertaData->pluck('akademik')->map->count();
+        // Hitung jumlah akademik dengan lebih optimal
+        $akademikCounts = $pesertaData->pluck('akademik')->map(fn($akademik) => count($akademik));
         $minAkademik = $akademikCounts->min() ?? 0;
         $maxAkademik = $akademikCounts->max() ?? 0;
 
-        $userAkademikCount = $pesertaData->flatMap->akademik
+        // Hitung jumlah peserta yang memiliki akademik = minAkademik
+        $countPesertaMinAkademik = $pesertaData->filter(fn($peserta) => count($peserta->akademik) === $minAkademik)->count();
+
+        // Hitung jumlah peserta yang memiliki akademik = maxAkademik
+        $countPesertaMaxAkademik = $pesertaData->filter(fn($peserta) => count($peserta->akademik) === $maxAkademik)->count();
+
+        // Hitung akademik yang berkaitan dengan user yang login
+        $userAkademikCount = $pesertaData->flatMap(fn($peserta) => $peserta->akademik)
             ->where('guru_id', Auth::id())
             ->count();
 
-        $hasilSistemStats = $pesertaData->groupBy('hasil_sistem')->map->count();
+        // Hitung hasil sistem tanpa perlu groupBy manual
+        $hasilSistemStats = $pesertaData->countBy('hasil_sistem');
 
         return [
             'total_active_peserta' => $totalActive,
             'min_akademik_per_peserta' => $minAkademik,
             'max_akademik_per_peserta' => $maxAkademik,
+            'count_peserta_with_min_akademik' => $countPesertaMinAkademik,
+            'count_peserta_with_max_akademik' => $countPesertaMaxAkademik,
             'user_akademik_count' => $userAkademikCount,
             'hasil_sistem' => [
                 'lulus' => $hasilSistemStats[HasilSistem::LULUS->getLabel()] ?? 0,

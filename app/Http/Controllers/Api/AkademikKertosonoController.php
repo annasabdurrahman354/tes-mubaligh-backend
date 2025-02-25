@@ -16,14 +16,28 @@ class AkademikKertosonoController extends Controller
     {
         $validated = $request->validate([
             'tes_santri_id' => 'required|exists:tes_santri,id',
-            'penilaian' => 'required',
-            'kekurangan_tajwid' => 'nullable',
-            'kekurangan_khusus' => 'nullable',
-            'kekurangan_keserasian' => 'nullable',
-            'kekurangan_kelancaran' => 'nullable',
-            'catatan' => 'nullable|string|max:255',
+            'penilaian' => 'required|string',
+            'kekurangan_tajwid' => 'nullable|string',
+            'kekurangan_khusus' => 'nullable|string',
+            'kekurangan_keserasian' => 'nullable|string',
+            'kekurangan_kelancaran' => 'nullable|string',
+            'catatan' => 'nullable|string',
             'rekomendasi_penarikan' => 'nullable|boolean',
             'durasi_penilaian' => 'required|numeric|min:0',
+        ], [
+            'tes_santri_id.required' => 'ID tes santri wajib diisi.',
+            'tes_santri_id.exists' => 'ID tes santri tidak ditemukan dalam database.',
+            'penilaian.required' => 'Penilaian wajib diisi.',
+            'penilaian.string' => 'Penilaian harus berupa teks.',
+            'kekurangan_tajwid.string' => 'Kekurangan tajwid harus berupa teks.',
+            'kekurangan_khusus.string' => 'Kekurangan khusus harus berupa teks.',
+            'kekurangan_keserasian.string' => 'Kekurangan keserasian harus berupa teks.',
+            'kekurangan_kelancaran.string' => 'Kekurangan kelancaran harus berupa teks.',
+            'catatan.string' => 'Catatan harus berupa teks.',
+            'rekomendasi_penarikan.boolean' => 'Rekomendasi penarikan harus berupa nilai benar atau salah.',
+            'durasi_penilaian.required' => 'Durasi penilaian wajib diisi.',
+            'durasi_penilaian.numeric' => 'Durasi penilaian harus berupa angka.',
+            'durasi_penilaian.min' => 'Durasi penilaian tidak boleh kurang dari 0.',
         ]);
 
         $validated['guru_id'] = Auth::id();
@@ -36,11 +50,11 @@ class AkademikKertosonoController extends Controller
             $validated
         );
 
-        return response()->json(["message" => "Nilai akademik berhasil disimpan!", "data" => $akademikKertosono], 200);
+        return response()->json(["message" => "Nilai akademik berhasil disimpan.", "data" => $akademikKertosono], 200);
     }
 
     /**
-     * List AkademikKediri entries with optional filters using Spatie Query Builder.
+     * List AkademikKertosono entries with optional filters using Spatie Query Builder.
      */
     public function index(Request $request)
     {
@@ -48,6 +62,6 @@ class AkademikKertosonoController extends Controller
             ->allowedFilters(['tes_santri_id', 'guru_id'])
             ->get();
 
-        return response()->json(["message" => "Data nilai akademik berhasil diambil!", "data" => $data], 200);
+        return response()->json(["message" => "Data nilai akademik berhasil diambil.", "data" => $data], 200);
     }
 }

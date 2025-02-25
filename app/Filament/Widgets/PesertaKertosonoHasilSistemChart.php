@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Enums\HasilSistem;
+use App\Enums\StatusTesKertosono;
 use App\Models\PesertaKediri;
 use App\Models\PesertaKertosono;
 use Illuminate\Contracts\View\View;
@@ -82,6 +83,13 @@ class PesertaKertosonoHasilSistemChart extends ApexChartWidget
 
         $periode_tes_id = getPeriodeTes();
         $peserta = PesertaKertosono::where('periode_id', $periode_tes_id)
+            ->whereIn('status_tes', [
+                StatusTesKertosono::AKTIF->value,
+                StatusTesKertosono::LULUS->value,
+                StatusTesKertosono::TIDAK_LULUS_AKHLAK->value,
+                StatusTesKertosono::TIDAK_LULUS_AKADEMIK->value,
+                StatusTesKertosono::PERLU_MUSYAWARAH->value
+            ])
             ->withHasilSistem()
             ->with(['siswa'])
             ->get();

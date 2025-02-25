@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules\Unique;
 
@@ -66,6 +67,25 @@ class AkademikKertosono extends Model
                 $this->kekurangan_kelancaran ?? [],
             )
         );
+    }
+
+    public function transform()
+    {
+        return [
+            'id' => $this->id,
+            'guru_id' => $this->guru_id,
+            'guru_nama' => $this->guru->nama ?? null,
+            'guru_foto' => $this->guru->getFilamentAvatarUrl(),
+            'penilaian' => $this->penilaian,
+            'kekurangan_kelancaran' => $this->kekurangan_kelancaran,
+            'kekurangan_keserasian' => $this->kekurangan_keserasian,
+            'kekurangan_khusus' => $this->kekurangan_khusus,
+            'kekurangan_tajwid' => $this->kekurangan_tajwid,
+            'catatan' => $this->catatan,
+            'rekomendasi_penarikan' => $this->rekomendasi_penarikan,
+            'durasi_penilaian' => $this->durasi_penilaian,
+            'created_at' => Carbon::parse($this->created_at)->translatedFormat('d F Y'),
+        ];
     }
 
     public function peserta()

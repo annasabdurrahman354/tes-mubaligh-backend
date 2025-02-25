@@ -17,16 +17,23 @@ class AkhlakKediriController extends Controller
         $validated = $request->validate([
             'tes_santri_id' => 'required|exists:tes_santri,id',
             'poin' => 'required|numeric|min:0|max:100',
-            'catatan' => 'string|max:255',
+            'catatan' => 'nullable|string|max:255',
+        ], [
+            'tes_santri_id.required' => 'ID tes santri wajib diisi.',
+            'tes_santri_id.exists' => 'ID tes santri tidak ditemukan dalam database.',
+            'poin.required' => 'Poin akhlak wajib diisi.',
+            'poin.numeric' => 'Poin akhlak harus berupa angka.',
+            'poin.min' => 'Poin akhlak minimal adalah 0.',
+            'poin.max' => 'Poin akhlak maksimal adalah 100.',
+            'catatan.string' => 'Catatan harus berupa teks.',
+            'catatan.max' => 'Catatan tidak boleh lebih dari 255 karakter.',
         ]);
 
         $validated['guru_id'] = Auth::id();
 
-        $akhlakKediri = AkhlakKediri::create(
-            $validated
-        );
+        $akhlakKediri = AkhlakKediri::create($validated);
 
-        return response()->json(["message" => "Nilai akhlak berhasil disimpan!", "data" => $akhlakKediri], 200);
+        return response()->json(["message" => "Nilai akhlak berhasil disimpan.", "data" => $akhlakKediri], 200);
     }
 
     /**

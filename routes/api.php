@@ -24,19 +24,18 @@ Route::get('/secret/cache', function() {
     return '<h1>Cache facade value refreshed</h1>';
 });
 
-Route::post('login-credential', [\App\Http\Controllers\Api\AuthController::class, 'loginWithCredential']);
-Route::post('login-nfc', [\App\Http\Controllers\Api\AuthController::class, 'loginWithNfc']);
+Route::post('login-credential', [\App\Http\Controllers\Api\AuthController::class, 'loginByCredential']);
+Route::post('login-rfid', [\App\Http\Controllers\Api\AuthController::class, 'loginByRFID']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('update-password', [\App\Http\Controllers\Api\AuthController::class, 'updatePassword']);
     Route::post('logout', [\App\Http\Controllers\Api\AuthController::class, 'logout']);
     Route::post('logout-from-all-devices', [\App\Http\Controllers\Api\AuthController::class, 'logoutFromAllDevices']);
     Route::get('peserta-kediri', [\App\Http\Controllers\Api\PesertaKediriController::class, 'index']);
-    Route::get('peserta-kediri/getByNfc', [\App\Http\Controllers\Api\PesertaKediriController::class, 'getByNfc']);
+    Route::get('peserta-kediri/rfid', [\App\Http\Controllers\Api\PesertaKediriController::class, 'getByRFID']);
 
     Route::get('peserta-kertosono', [\App\Http\Controllers\Api\PesertaKertosonoController::class, 'index']);
-    Route::get('peserta-kertosono/getByNfc', [\App\Http\Controllers\Api\PesertaKertosonoController::class, 'getByNfc']);
-    Route::get('peserta-kertosono/getAuthSimak', [\App\Http\Controllers\Api\PesertaKertosonoController::class, 'getAuthSimak']);
+    Route::get('peserta-kertosono/rfid', [\App\Http\Controllers\Api\PesertaKertosonoController::class, 'getByRFID']);
 
     Route::post('akademik-kediri', [\App\Http\Controllers\Api\AkademikKediriController::class, 'store']);
     Route::post('akhlak-kediri', [\App\Http\Controllers\Api\AkhlakKediriController::class, 'store']);

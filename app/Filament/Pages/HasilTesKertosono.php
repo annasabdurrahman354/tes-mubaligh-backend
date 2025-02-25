@@ -93,6 +93,10 @@ class HasilTesKertosono extends Page implements HasTable
                     ->formatStateUsing(function (PesertaKertosono $record) {
                         return $record->rekomendasi_guru;
                     })
+                    ->badge()
+                    ->separator(',')
+                    ->limitList(3)
+                    ->expandableLimitedList()
                     ->sortable(),
 
                 TextColumn::make('hasil_sistem')

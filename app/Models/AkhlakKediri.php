@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Tables;
 use Filament\Forms;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class AkhlakKediri extends Model
@@ -34,6 +35,19 @@ class AkhlakKediri extends Model
         return Attribute::make(
             get: fn () => 'Akhlak '.$this->peserta->recordTitle,
         );
+    }
+
+    public function transform()
+    {
+        return [
+            'id' => $this->id,
+            'guru_id' => $this->guru_id,
+            'guru_nama' => $this->guru->nama ?? null,
+            'guru_foto' => $this->guru->getFilamentAvatarUrl(),
+            'catatan' => $this->catatan,
+            'poin' => $this->poin,
+            'created_at' => Carbon::parse($this->created_at)->translatedFormat('d F Y'),
+        ];
     }
 
     public function peserta()

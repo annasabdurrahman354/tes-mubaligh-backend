@@ -76,6 +76,29 @@ class PesertaKertosonoController extends Controller
         return response()->json($peserta);
     }
 
+    public function getByRFID(Request $request)
+    {
+        $rfid = $request->query('rfid');
+        $periode_pengetesan_id = getPeriodeTes();
+
+        $peserta = PesertaKertosono::whereHas('siswa', fn($query) => $query->where('rfid', $rfid))
+            ->join('siswa', 'peserta_kediri.siswa_id', '=', 'siswa.id')
+            ->where('periode_id', $periode_pengetesan_id)
+            ->first();
+
+        if (!$peserta) {
+            return response()->json(['message' => 'Smartcard tidak terdata sebagai peserta.'], 404);
+        }
+
+        $response = $this->transformPeserta($peserta, $request);
+
+        return response()->json([
+            'message' => 'Smartcard terdata sebagai peserta.',
+            'data' => $response,
+        ]);
+    }
+
+
     private function allowedFilters(): array
     {
         return [
@@ -91,7 +114,8 @@ class PesertaKertosonoController extends Controller
         $tanggalLahir = $peserta->siswa->tanggal_lahir;
         $umur = Carbon::parse($tanggalLahir)->age;
         $pendidikan = $peserta->siswa->jurusan != null && $peserta->siswa->jurusan != '' ? $peserta->siswa->pendidikan . ' - ' . $peserta->siswa->jurusan : $peserta->siswa->pendidikan;
-        $telah_disimak = $peserta->akademik->contains(fn($akademik) => $akademik->guru_id === $currentUserId);
+        //$telah_disimak = $peserta->akademik->contains(fn($akademik) => $akademik->guru_id === $currentUserId);
+        $akademik = $peserta->akademik->first(fn($akademik) => $akademik->guru_id === $currentUserId);
 
         return [
             'id' => $peserta->id,
@@ -116,44 +140,17 @@ class PesertaKertosonoController extends Controller
             'nama_ayah' => formatNamaProper($peserta->siswa->nama_ayah),
             'riwayat_tes' => $peserta->riwayat_tes,
             'jumlah_penyimakan' => $peserta->count_lulus + $peserta->count_tidak_lulus,
-            'count_lulus' => $peserta->count_lulus,
-            'count_tidak_lulus' => $peserta->count_tidak_lulus,
+            'count_akademik_lulus' => $peserta->count_lulus,
+            'count_akademik_tidak_lulus' => $peserta->count_tidak_lulus,
+            'semua_kekurangan'=> $peserta->allKekurangan,
+            'perekomendasi' => $peserta->rekomendasiGuru,
             'hasil_sistem' => $peserta->hasil_sistem,
-            'telah_disimak' => $telah_disimak,
+            'telah_disimak' => $akademik != null,
+            'penilaian_anda' => $akademik? $akademik->penilaian : null,
+            'rekomendasi_anda' => $akademik? $akademik->rekomendasi_penarikan : null,
             'foto_smartcard' => $peserta->siswa->urlFotoIdentitas,
-            'akhlak' => $this->transformAkhlak($peserta->akhlak),
-            'akademik' => $this->transformAkademik($peserta->akademik),
+            'akhlak' => $peserta->akhlak->map(fn($akhlak) => $akhlak->transform()),
+            'akademik' => $peserta->akademik->map(fn($akademik) => $akademik->transform()),
         ];
-    }
-
-    private function transformAkhlak($akhlak)
-    {
-        return $akhlak->map(fn($item) => [
-            'id' => $item->id,
-            'guru_id' => $item->guru_id,
-            'guru_nama' => $item->guru->nama ?? null,
-            'guru_foto' => $item->guru->getFilamentAvatarUrl(),
-            'catatan' => $item->catatan,
-            'created_at' => Carbon::parse($item->created_at)->translatedFormat('d F Y'),
-        ]);
-    }
-
-    private function transformAkademik($akademik)
-    {
-        return $akademik->map(fn($item) => [
-            'id' => $item->id,
-            'guru_id' => $item->guru_id,
-            'guru_nama' => $item->guru->nama ?? null,
-            'guru_foto' => $item->guru->getFilamentAvatarUrl(),
-            'penilaian' => $item->penilaian,
-            'kekurangan_kelancaran' => $item->kekurangan_kelancaran,
-            'kekurangan_keserasian' => $item->kekurangan_keserasian,
-            'kekurangan_khusus' => $item->kekurangan_khusus,
-            'kekurangan_tajwid' => $item->kekurangan_tajwid,
-            'catatan' => $item->catatan,
-            'rekomendasi_penarikan' => $item->rekomendasi_penarikan,
-            'durasi_penilaian' => $item->durasi_penilaian,
-            'created_at' => Carbon::parse($item->created_at)->translatedFormat('d F Y'),
-        ]);
     }
 }

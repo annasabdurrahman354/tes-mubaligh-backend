@@ -90,22 +90,21 @@ class PesertaKediriController extends Controller
         return response()->json($peserta);
     }
 
-    public function getByNfc(Request $request)
+    public function getByRFID(Request $request)
     {
-        $nfc = $request->query('nfc');
+        $rfid = $request->query('rfid');
         $periode_pengetesan_id = getPeriodeTes();
 
-        $peserta = PesertaKediri::whereHas('siswa', fn($query) => $query->where('rfid', $nfc))
+        $peserta = PesertaKediri::whereHas('siswa', fn($query) => $query->where('rfid', $rfid))
             ->join('siswa', 'peserta_kediri.siswa_id', '=', 'siswa.id')
             ->where('periode_id', $periode_pengetesan_id)
-            ->select($this->selectFields())
             ->first();
 
         if (!$peserta) {
             return response()->json(['message' => 'Smartcard tidak terdata sebagai peserta.'], 404);
         }
 
-        $response = $this->transformPeserta($peserta, $request->user()->id);
+        $response = $this->transformPeserta($peserta, $request);
 
         return response()->json([
             'message' => 'Smartcard terdata sebagai peserta.',
@@ -168,43 +167,8 @@ class PesertaKediriController extends Controller
             'hasil_sistem' => $peserta->hasil_sistem,
             'telah_disimak' => $telah_disimak,
             'foto_smartcard' => $peserta->siswa->urlFotoIdentitas,
-            'akhlak' => $this->transformAkhlak($peserta->akhlak),
-            'akademik' => $this->transformAkademik($peserta->akademik),
+            'akhlak' => $peserta->akhlak->map(fn($akhlak) => $akhlak->transform()),
+            'akademik' => $peserta->akademik->map(fn($akademik) => $akademik->transform()),
         ];
-    }
-
-    /**
-     * Transform Akhlak data.
-     */
-    private function transformAkhlak($akhlakCollection)
-    {
-        return $akhlakCollection->map(fn($akhlak) => [
-            'id' => $akhlak->id,
-            'guru_id' => $akhlak->guru_id,
-            'guru_nama' => $akhlak->guru->nama ?? null,
-            'guru_foto' => $akhlak->guru->getFilamentAvatarUrl(),
-            'catatan' => $akhlak->catatan,
-            'poin' => $akhlak->poin,
-            'created_at' => Carbon::parse($akhlak->created_at)->translatedFormat('d F Y'),
-        ]);
-    }
-
-    /**
-     * Transform Akademik data.
-     */
-    private function transformAkademik($akademikCollection)
-    {
-        return $akademikCollection->map(fn($akademik) => [
-            'id' => $akademik->id,
-            'guru_id' => $akademik->guru_id,
-            'guru_nama' => $akademik->guru->nama ?? null,
-            'guru_foto' => $akademik->guru->getFilamentAvatarUrl(),
-            'nilai_makna' => $akademik->nilai_makna,
-            'nilai_keterangan' => $akademik->nilai_keterangan,
-            'nilai_penjelasan' => $akademik->nilai_penjelasan,
-            'nilai_pemahaman' => $akademik->nilai_pemahaman,
-            'catatan' => $akademik->catatan,
-            'created_at' => Carbon::parse($akademik->created_at)->translatedFormat('d F Y'),
-        ]);
     }
 }

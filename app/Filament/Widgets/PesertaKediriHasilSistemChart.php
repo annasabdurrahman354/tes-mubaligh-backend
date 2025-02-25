@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Enums\HasilSistem;
+use App\Enums\StatusTesKediri;
 use App\Models\PesertaKediri;
 use Illuminate\Contracts\View\View;
 use Leandrocfe\FilamentApexCharts\Widgets\ApexChartWidget;
@@ -40,6 +41,12 @@ class PesertaKediriHasilSistemChart extends ApexChartWidget
 
         $periode_tes_id = getPeriodeTes();
         $peserta = PesertaKediri::where('periode_id', $periode_tes_id)
+            ->whereIn('status_tes', [
+                StatusTesKediri::AKTIF->value,
+                StatusTesKediri::LULUS->value,
+                StatusTesKediri::TIDAK_LULUS_AKHLAK->value,
+                StatusTesKediri::TIDAK_LULUS_AKADEMIK->value
+            ])
             ->withHasilSistem()
             ->with(['siswa'])
             ->get();

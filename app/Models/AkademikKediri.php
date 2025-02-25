@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules\Unique;
 
@@ -39,6 +40,22 @@ class AkademikKediri extends Model
         return Attribute::make(
             get: fn () => 'Nilai Penyampaian '.$this->peserta->recordTitle,
         );
+    }
+
+    public function transform()
+    {
+        return [
+            'id' => $this->id,
+            'guru_id' => $this->guru_id,
+            'guru_nama' => $this->guru->nama ?? null,
+            'guru_foto' => $this->guru->getFilamentAvatarUrl(),
+            'nilai_makna' => $this->nilai_makna,
+            'nilai_keterangan' => $this->nilai_keterangan,
+            'nilai_penjelasan' => $this->nilai_penjelasan,
+            'nilai_pemahaman' => $this->nilai_pemahaman,
+            'catatan' => $this->catatan,
+            'created_at' => Carbon::parse($this->created_at)->translatedFormat('d F Y'),
+        ];
     }
 
     public function peserta()

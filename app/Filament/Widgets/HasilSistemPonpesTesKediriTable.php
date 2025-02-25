@@ -7,21 +7,21 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 
-class PesertaTesKertosonoHasilSistemTable extends BaseWidget
+class HasilSistemPonpesTesKediriTable extends BaseWidget
 {
-    protected static ?int $sort = 99;
+    protected static ?int $sort = 98;
     protected static ?string $pollingInterval = null;
     protected static bool $isLazy = false;
 
     public function table(Table $table): Table
     {
         return $table
-            ->heading('Hasil Sistem Tes Kertosono')
+            ->heading('Hasil Sistem Tes Kediri')
             ->query(
-                Ponpes::whereHas('pesertaKertosono', function ($query) {
+                Ponpes::whereHas('pesertaKediri', function ($query) {
                     $query->where('periode_id', getPeriodeTes());
                 })
-                ->withPesertaKertosonoHasilSistemCounts()
+                ->withPesertaKediriHasilSistemCounts()
             )
             ->columns([
                 Tables\Columns\TextColumn::make('n_ponpes')
@@ -40,9 +40,6 @@ class PesertaTesKertosonoHasilSistemTable extends BaseWidget
                     ->sortable(),
                 Tables\Columns\TextColumn::make('peserta_tidak_lulus')
                     ->label('Tidak Lulus')
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('peserta_perlu_musyawarah')
-                    ->label('Perlu Musyawarah')
                     ->sortable(),
             ])
             ->paginationPageOptions([5,10,25,50])

@@ -76,6 +76,39 @@ class PesertaKertosono extends Model
         );
     }
 
+    public function rekomendasiGuru(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->akademik()
+                ->where('rekomendasi_penarikan', 1)
+                ->with('guru')
+                ->get()
+                ->pluck('guru.nama')
+                ->unique()
+                ->implode(', ')
+        );
+    }
+
+    protected function allKekurangan(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                // Collect and merge all kekurangan fields
+                $allKekurangan = $this->akademik->flatMap(function ($record) {
+                    return array_merge(
+                        $record->kekurangan_tajwid ?? [],
+                        $record->kekurangan_khusus ?? [],
+                        $record->kekurangan_keserasian ?? [],
+                        $record->kekurangan_kelancaran ?? []
+                    );
+                });
+
+                // Remove duplicates and return as an array
+                return array_values(array_unique($allKekurangan->toArray()));
+            }
+        );
+    }
+
     public function siswa()
     {
         return $this->belongsTo(Siswa::class, 'nispn', 'nispn');
@@ -99,42 +132,6 @@ class PesertaKertosono extends Model
     public function akademik()
     {
         return $this->hasMany(AkademikKertosono::class, 'tes_santri_id');
-    }
-
-    public function rekomendasiGuru(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => $this->akademik()
-                ->where('rekomendasi_penarikan', 1)
-                ->with('guru')
-                ->get()
-                ->pluck('guru.nama')
-                ->unique()
-                ->implode(', ')
-        );
-    }
-
-    protected function allKekurangan(): Attribute
-    {
-        return Attribute::make(
-            get: function () {
-                // Fetch all related akademik_kertosono records
-                $relatedRecords = $this->akademik;
-
-                // Collect and merge all kekurangan fields
-                $allKekurangan = $relatedRecords->flatMap(function ($record) {
-                    return array_merge(
-                        $record->kekurangan_tajwid ?? [],
-                        $record->kekurangan_khusus ?? [],
-                        $record->kekurangan_keserasian ?? [],
-                        $record->kekurangan_kelancaran ?? []
-                    );
-                });
-
-                // Remove duplicates and return as an array
-                return array_values(array_unique($allKekurangan->toArray()));
-            }
-        );
     }
 
     public function scopeWithHasilSistem($query): void

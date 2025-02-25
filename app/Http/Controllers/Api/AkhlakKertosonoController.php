@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\AkhlakKediri;
 use App\Models\AkhlakKertosono;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,16 +16,19 @@ class AkhlakKertosonoController extends Controller
     {
         $validated = $request->validate([
             'tes_santri_id' => 'required|exists:tes_santri,id',
-            'catatan' => 'string|max:255',
+            'catatan' => 'nullable|string|max:255',
+        ], [
+            'tes_santri_id.required' => 'ID tes santri wajib diisi.',
+            'tes_santri_id.exists' => 'ID tes santri tidak ditemukan dalam database.',
+            'catatan.string' => 'Catatan harus berupa teks.',
+            'catatan.max' => 'Catatan tidak boleh lebih dari 255 karakter.',
         ]);
 
         $validated['guru_id'] = Auth::id();
 
-        $akhlakKertosono = AkhlakKertosono::create(
-            $validated
-        );
+        $akhlakKertosono = AkhlakKertosono::create($validated);
 
-        return response()->json(["message" => "Nilai akhlak berhasil disimpan!", "data" => $akhlakKertosono], 200);
+        return response()->json(["message" => "Nilai akhlak berhasil disimpan.", "data" => $akhlakKertosono], 200);
     }
 
     /**
