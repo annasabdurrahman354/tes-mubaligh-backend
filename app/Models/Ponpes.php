@@ -58,7 +58,7 @@ class Ponpes extends Model
                 ->whereHas('akademik')
                 ->whereIn('id', function ($subquery) {
                     $subquery->select('tb_tes_santri.id_tes_santri')
-                        ->from('tes_santri')
+                        ->from('tb_tes_santri')
                         ->leftJoin('tes_akademik_kediri', 'tes_akademik_kediri.tes_santri_id', '=', 'tb_tes_santri.id_tes_santri')
                         ->whereColumn('tb_tes_santri.id_ponpes', 'tb_ponpes.id_ponpes')
                         ->groupBy('tb_tes_santri.id_tes_santri')
@@ -80,7 +80,7 @@ class Ponpes extends Model
                 ->whereHas('akademik')
                 ->whereIn('id', function ($subquery) {
                     $subquery->select('tb_tes_santri.id_tes_santri')
-                        ->from('tes_santri')
+                        ->from('tb_tes_santri')
                         ->leftJoin('tes_akademik_kediri', 'tes_akademik_kediri.tes_santri_id', '=', 'tb_tes_santri.id_tes_santri')
                         ->whereColumn('tb_tes_santri.id_ponpes', 'tb_ponpes.id_ponpes')
                         ->groupBy('tb_tes_santri.id_tes_santri')
@@ -111,7 +111,7 @@ class Ponpes extends Model
                 ->whereHas('akademik')
                 ->whereIn('id', function ($subquery) {
                     $subquery->select('tb_tes_santri.id_tes_santri')
-                        ->from('tes_santri')
+                        ->from('tb_tes_santri')
                         ->leftJoin('tes_akademik_kertosono', 'tes_akademik_kertosono.tes_santri_id', '=', 'tb_tes_santri.id_tes_santri')
                         ->whereColumn('tb_tes_santri.id_ponpes', 'tb_ponpes.id_ponpes')
                         ->groupBy('tb_tes_santri.id_tes_santri')
@@ -127,7 +127,7 @@ class Ponpes extends Model
                 ->whereHas('akademik')
                 ->whereIn('id', function ($subquery) {
                     $subquery->select('tb_tes_santri.id_tes_santri')
-                        ->from('tes_santri')
+                        ->from('tb_tes_santri')
                         ->leftJoin('tes_akademik_kertosono', 'tes_akademik_kertosono.tes_santri_id', '=', 'tb_tes_santri.id_tes_santri')
                         ->whereColumn('tb_tes_santri.id_ponpes', 'tb_ponpes.id_ponpes')
                         ->groupBy('tb_tes_santri.id_tes_santri')
@@ -143,7 +143,7 @@ class Ponpes extends Model
                 ->whereHas('akademik')
                 ->whereIn('id', function ($subquery) {
                     $subquery->select('tb_tes_santri.id_tes_santri')
-                        ->from('tes_santri')
+                        ->from('tb_tes_santri')
                         ->leftJoin('tes_akademik_kertosono', 'tes_akademik_kertosono.tes_santri_id', '=', 'tb_tes_santri.id_tes_santri')
                         ->whereColumn('tb_tes_santri.id_ponpes', 'tb_ponpes.id_ponpes')
                         ->groupBy('tb_tes_santri.id_tes_santri')
