@@ -34,7 +34,7 @@ class DatabaseSeeder extends Seeder
             'id_periode' => $thisMonth,
             'bulan' => $currentDate->copy()->addMonth()->format('m'),
             'tahun' => $currentDate->copy()->addMonth()->year,
-            'status' => 'tes'
+            'status' => 'pengetesan'
         ];
 
         $nextMonth = Carbon::now()->addMonth();
@@ -44,7 +44,7 @@ class DatabaseSeeder extends Seeder
             'id_periode' => $nextMonthId,
             'bulan' => $nextMonth->copy()->addMonth()->format('m'),
             'tahun' => $nextMonth->copy()->addMonth()->year,
-            'status' => 'pendaftaran'
+            'status' => 'registrasi'
         ];
 
         // Insert the data into the database

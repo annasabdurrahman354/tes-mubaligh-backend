@@ -6,7 +6,7 @@ use Illuminate\Support\Str;
 if(! function_exists('getPeriodePendaftaran')) {
     function getPeriodePendaftaran()
     {
-        return \App\Models\Periode::where('status', 'pendaftaran')->orderBy('id_periode', 'DESC')->first()->id_periode;
+        return \App\Models\Periode::where('status', 'registrasi')->orderBy('id_periode', 'DESC')->first()->id_periode;
     }
 }
 
@@ -14,7 +14,7 @@ if(! function_exists('getPeriodePendaftaran')) {
 if(! function_exists('getPeriodeTes')) {
     function getPeriodeTes()
     {
-        return \App\Models\Periode::where('status', 'tes')->orderBy('id_periode', 'DESC')->first()->id_periode;
+        return \App\Models\Periode::where('status', 'pengetesan')->orderBy('id_periode', 'DESC')->first()->id_periode;
     }
 }
 
