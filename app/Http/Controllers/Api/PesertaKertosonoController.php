@@ -82,7 +82,7 @@ class PesertaKertosonoController extends Controller
         $periode_pengetesan_id = getPeriodeTes();
 
         $peserta = PesertaKertosono::whereHas('siswa', fn($query) => $query->where('rfid', $rfid))
-            ->join('siswa', 'peserta_kediri.siswa_id', '=', 'siswa.id')
+            ->join('tb_personal_data3', 'tes_santri.nispn', '=', 'tb_personal_data3.nispn')
             ->where('periode_id', $periode_pengetesan_id)
             ->first();
 
