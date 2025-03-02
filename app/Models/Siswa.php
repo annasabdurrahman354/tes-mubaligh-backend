@@ -108,7 +108,7 @@ class Siswa extends Model implements HasMedia
     protected function urlFotoIdentitas(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->img_identitas ? 'https://ppwb.kita-kita.online/sisfo-ponpes/images/'.$this->img_identitas : $this->getFirstMediaUrl('siswa_foto_identitas', 'thumb'),
+            get: fn () => $this->img_person ? 'https://ppwb.kita-kita.online/sisfo-ponpes/images/'.$this->img_person : $this->getFirstMediaUrl('siswa_foto_identitas', 'thumb'),
         );
     }
 
