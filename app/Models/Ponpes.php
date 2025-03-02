@@ -56,7 +56,7 @@ class Ponpes extends Model
             'peserta_lulus' => PesertaKediri::selectRaw('COUNT(*)')
                 ->whereColumn('id_ponpes', 'tb_ponpes.id_ponpes')
                 ->whereHas('akademik')
-                ->whereIn('id', function ($subquery) {
+                ->whereIn('id_tes_santri', function ($subquery) {
                     $subquery->select('tb_tes_santri.id_tes_santri')
                         ->from('tb_tes_santri')
                         ->leftJoin('tes_akademik_kediri', 'tes_akademik_kediri.tes_santri_id', '=', 'tb_tes_santri.id_tes_santri')
@@ -78,7 +78,7 @@ class Ponpes extends Model
             'peserta_tidak_lulus' => PesertaKediri::selectRaw('COUNT(*)')
                 ->whereColumn('id_ponpes', 'tb_ponpes.id_ponpes')
                 ->whereHas('akademik')
-                ->whereIn('id', function ($subquery) {
+                ->whereIn('id_tes_santri', function ($subquery) {
                     $subquery->select('tb_tes_santri.id_tes_santri')
                         ->from('tb_tes_santri')
                         ->leftJoin('tes_akademik_kediri', 'tes_akademik_kediri.tes_santri_id', '=', 'tb_tes_santri.id_tes_santri')
@@ -109,7 +109,7 @@ class Ponpes extends Model
             'peserta_lulus' => PesertaKertosono::selectRaw('COUNT(*)')
                 ->whereColumn('id_ponpes', 'tb_ponpes.id_ponpes')
                 ->whereHas('akademik')
-                ->whereIn('id', function ($subquery) {
+                ->whereIn('id_tes_santri', function ($subquery) {
                     $subquery->select('tb_tes_santri.id_tes_santri')
                         ->from('tb_tes_santri')
                         ->leftJoin('tes_akademik_kertosono', 'tes_akademik_kertosono.tes_santri_id', '=', 'tb_tes_santri.id_tes_santri')
@@ -125,7 +125,7 @@ class Ponpes extends Model
             'peserta_tidak_lulus' => PesertaKertosono::selectRaw('COUNT(*)')
                 ->whereColumn('id_ponpes', 'tb_ponpes.id_ponpes')
                 ->whereHas('akademik')
-                ->whereIn('id', function ($subquery) {
+                ->whereIn('id_tes_santri', function ($subquery) {
                     $subquery->select('tb_tes_santri.id_tes_santri')
                         ->from('tb_tes_santri')
                         ->leftJoin('tes_akademik_kertosono', 'tes_akademik_kertosono.tes_santri_id', '=', 'tb_tes_santri.id_tes_santri')
@@ -141,7 +141,7 @@ class Ponpes extends Model
             'peserta_perlu_musyawarah' => PesertaKertosono::selectRaw('COUNT(*)')
                 ->whereColumn('id_ponpes', 'tb_ponpes.id_ponpes')
                 ->whereHas('akademik')
-                ->whereIn('id', function ($subquery) {
+                ->whereIn('id_tes_santri', function ($subquery) {
                     $subquery->select('tb_tes_santri.id_tes_santri')
                         ->from('tb_tes_santri')
                         ->leftJoin('tes_akademik_kertosono', 'tes_akademik_kertosono.tes_santri_id', '=', 'tb_tes_santri.id_tes_santri')
