@@ -25,6 +25,7 @@ class PesertaKediriController extends Controller
             ->allowedFilters($this->allowedFilters())
             ->where('id_periode', $periode_pengetesan_id)
             ->where('status_tes', 'aktif')
+            ->where('del_status', NULL)
             ->tap(fn($query) => $query->withHasilSistem()) // Ensures scope is applied
             ->with(['siswa']) // Eager loading siswa for performance
             ->orderBy(function ($query) {

@@ -24,6 +24,7 @@ class PesertaKertosonoController extends Controller
             ->allowedFilters($this->allowedFilters())
             ->where('id_periode', $periode_pengetesan_id)
             ->where('status_tes', 'aktif')
+            ->where('del_status', NULL)
             ->orderByRaw('CONVERT(nomor_cocard, SIGNED) asc')
             ->tap(fn($query) => $query->withHasilSistem()) // Ensures scope is applied
             ->with(['siswa']) // Eager loading siswa for performance
