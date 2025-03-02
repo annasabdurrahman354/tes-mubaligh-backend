@@ -40,6 +40,7 @@ class SiswaResource extends Resource
                 ]),
             ])
             ->selectCurrentPageOnly()
+            ->defaultSort('nispn')
             ->striped();
     }
 

@@ -25,7 +25,7 @@ class Siswa extends Model implements HasMedia
 {
     use HasFactory, InteractsWithMedia;
 
-    protected $table = 'tb_personal_data3';
+    protected $table = 'tb_personal_data';
     protected $primaryKey = 'nik';
     public $incrementing = false;
     protected $keyType = 'string';
