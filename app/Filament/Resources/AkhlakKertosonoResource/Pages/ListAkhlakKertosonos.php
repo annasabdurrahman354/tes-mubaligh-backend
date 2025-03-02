@@ -25,12 +25,12 @@ class ListAkhlakKertosonos extends ListRecords
         $tabs = [
             'Pengetesan (' . $periodePengetesan . ')' => Tab::make()->query(fn ($query) =>
             $query->whereHas('peserta', fn ($subQuery) =>
-            $subQuery->where('periode_id', $periodePengetesan)
+            $subQuery->where('id_periode', $periodePengetesan)
             )
             ),
             'Periode Lain' => Tab::make()->query(fn ($query) =>
             $query->whereHas('peserta', fn ($subQuery) =>
-            $subQuery->where('periode_id', '!=', $periodePengetesan)
+            $subQuery->where('id_periode', '!=', $periodePengetesan)
             )
             ),
         ];

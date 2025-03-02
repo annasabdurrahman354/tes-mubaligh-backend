@@ -19,7 +19,7 @@ class HasilSistemPonpesTesKediriTable extends BaseWidget
             ->heading('Hasil Sistem Tes Kediri')
             ->query(
                 Ponpes::whereHas('pesertaKediri', function ($query) {
-                    $query->where('periode_id', getPeriodeTes());
+                    $query->where('id_periode', getPeriodeTes());
                 })
                 ->withPesertaKediriHasilSistemCounts()
             )

@@ -19,10 +19,10 @@ if(! function_exists('getPeriodeTes')) {
 }
 
 if(! function_exists('getYearAndMonthName')) {
-    function getYearAndMonthName(int $periode_id): array
+    function getYearAndMonthName(int $id_periode): array
     {
         // Convert the integer to a string
-        $periodeString = (string)$periode_id;
+        $periodeString = (string)$id_periode;
 
         // Extract year and month number
         $year = substr($periodeString, 0, 4);  // First 4 characters are the year

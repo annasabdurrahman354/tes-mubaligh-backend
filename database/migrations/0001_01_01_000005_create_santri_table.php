@@ -15,8 +15,8 @@ return new class extends Migration
 
         Schema::create('tb_tes_santri', function (Blueprint $table) {
             $table->id('id_tes');
-            $table->integer('ponpes_id');
-            $table->integer('periode_id');
+            $table->integer('id_ponpes');
+            $table->integer('id_periode');
             $table->string('nispn');
             $table->string('tahap')->nullable();
             $table->string('kelompok')->nullable();

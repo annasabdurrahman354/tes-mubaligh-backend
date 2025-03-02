@@ -41,7 +41,7 @@ class PesertaKertosonoHasilSistemChart extends ApexChartWidget
         $activeFilter = $this->filter;
 
         $periode_tes_id = getPeriodeTes();
-        $peserta = PesertaKertosono::where('periode_id', $periode_tes_id)
+        $peserta = PesertaKertosono::where('id_periode', $periode_tes_id)
             ->withHasilSistem()
             ->with(['siswa'])
             ->get();
@@ -82,7 +82,7 @@ class PesertaKertosonoHasilSistemChart extends ApexChartWidget
         $activeFilter = $this->filter;
 
         $periode_tes_id = getPeriodeTes();
-        $peserta = PesertaKertosono::where('periode_id', $periode_tes_id)
+        $peserta = PesertaKertosono::where('id_periode', $periode_tes_id)
             ->whereIn('status_tes', [
                 StatusTesKertosono::AKTIF->value,
                 StatusTesKertosono::LULUS->value,

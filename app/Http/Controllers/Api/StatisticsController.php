@@ -21,7 +21,7 @@ class StatisticsController extends Controller
         $periode_tes = $periode['monthName'] . ' ' . $periode['year'];
 
         // Query utama
-        $baseQuery = $pesertaModel::where('periode_id', $periode_pengetesan_id)
+        $baseQuery = $pesertaModel::where('id_periode', $periode_pengetesan_id)
             ->whereNotIn('status_tes', [
                 $statusEnum::PRA_TES->value,
                 $statusEnum::TUNDA->value

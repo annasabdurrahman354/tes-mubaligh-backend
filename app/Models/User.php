@@ -99,7 +99,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasName, 
 
         return $this->akademikKertosono()
             ->whereHas('peserta', function ($query) use ($periodePengetesanId) {
-                $query->where('periode_id', $periodePengetesanId)
+                $query->where('id_periode', $periodePengetesanId)
                     ->whereHas('siswa', function ($siswaQuery) {
                         $siswaQuery->where('jenis_kelamin', JenisKelamin::LAKI_LAKI);
                     });
@@ -113,7 +113,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasName, 
 
         return $this->akademikKediri()
             ->whereHas('peserta', function ($query) use ($periodePengetesanId) {
-                $query->where('periode_id', $periodePengetesanId)
+                $query->where('id_periode', $periodePengetesanId)
                     ->whereHas('siswa', function ($siswaQuery) {
                         $siswaQuery->where('jenis_kelamin', JenisKelamin::PEREMPUAN);
                     });
@@ -127,7 +127,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasName, 
 
         return $this->akademikKediri()
             ->whereHas('peserta', function ($query) use ($periodePengetesanId) {
-                $query->where('periode_id', $periodePengetesanId);
+                $query->where('id_periode', $periodePengetesanId);
             })
             ->count();
     }
@@ -138,7 +138,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasName, 
 
         return $this->akademikKertosono()
             ->whereHas('peserta', function ($query) use ($periodePengetesanId) {
-                $query->where('periode_id', $periodePengetesanId)
+                $query->where('id_periode', $periodePengetesanId)
                     ->whereHas('siswa', function ($siswaQuery) {
                         $siswaQuery->where('jenis_kelamin', JenisKelamin::LAKI_LAKI);
                     });
@@ -152,7 +152,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasName, 
 
         return $this->akademikKertosono()
             ->whereHas('peserta', function ($query) use ($periodePengetesanId) {
-                $query->where('periode_id', $periodePengetesanId)
+                $query->where('id_periode', $periodePengetesanId)
                     ->whereHas('siswa', function ($siswaQuery) {
                         $siswaQuery->where('jenis_kelamin', JenisKelamin::PEREMPUAN);
                     });
@@ -166,7 +166,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasName, 
 
         return $this->akademikKertosono()
             ->whereHas('peserta', function ($query) use ($periodePengetesanId) {
-                $query->where('periode_id', $periodePengetesanId);
+                $query->where('id_periode', $periodePengetesanId);
             })
             ->count();
     }
@@ -177,7 +177,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasName, 
 
         return $this->akademikKertosono()
             ->whereHas('peserta', function ($query) use ($periodePengetesanId) {
-                $query->where('periode_id', $periodePengetesanId);
+                $query->where('id_periode', $periodePengetesanId);
             })
             ->sum('durasi_penilaian');
     }
@@ -188,7 +188,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasName, 
 
         return $this->akademikKertosono()
             ->whereHas('peserta', function ($query) use ($periodePengetesanId) {
-                $query->where('periode_id', $periodePengetesanId);
+                $query->where('id_periode', $periodePengetesanId);
             })
             ->average('durasi_penilaian');
     }

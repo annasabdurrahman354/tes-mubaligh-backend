@@ -40,7 +40,7 @@ class PesertaKediriHasilSistemChart extends ApexChartWidget
         $activeFilter = $this->filter;
 
         $periode_tes_id = getPeriodeTes();
-        $peserta = PesertaKediri::where('periode_id', $periode_tes_id)
+        $peserta = PesertaKediri::where('id_periode', $periode_tes_id)
             ->whereIn('status_tes', [
                 StatusTesKediri::AKTIF->value,
                 StatusTesKediri::LULUS->value,
@@ -98,7 +98,7 @@ class PesertaKediriHasilSistemChart extends ApexChartWidget
         $activeFilter = $this->filter;
 
         $periode_tes_id = getPeriodeTes();
-        $peserta = PesertaKediri::where('periode_id', $periode_tes_id)
+        $peserta = PesertaKediri::where('id_periode', $periode_tes_id)
             ->withHasilSistem()
             ->with(['siswa'])
             ->get();

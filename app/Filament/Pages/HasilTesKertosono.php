@@ -52,7 +52,7 @@ class HasilTesKertosono extends Page implements HasTable
                 PesertaKertosono::query()
                     ->with('siswa')
                     ->withHasilSistem()
-                    ->where('periode_id', $periode_pengetesan_id)
+                    ->where('id_periode', $periode_pengetesan_id)
                     ->whereNotIn('status_tes', [
                         StatusTesKertosono::TUNDA->value
                     ])
@@ -274,7 +274,7 @@ class HasilTesKertosono extends Page implements HasTable
                 Action::make('sesuaikan_hasil_sistem')
                     ->label('Sesuaikan Hasil')
                     ->action(function () use ($periode_pengetesan_id): void {
-                        PesertaKertosono::where('periode_id', $periode_pengetesan_id)
+                        PesertaKertosono::where('id_periode', $periode_pengetesan_id)
                             ->whereNotIn('status_tes', [
                                 StatusTesKertosono::PRA_TES->value,
                                 StatusTesKertosono::TUNDA->value,
@@ -349,7 +349,7 @@ class HasilTesKertosono extends Page implements HasTable
                 Action::make('reset_hasil_sistem')
                     ->label('Reset Hasil')
                     ->action(function () use ($periode_pengetesan_id): void {
-                        PesertaKertosono::where('periode_id', $periode_pengetesan_id)
+                        PesertaKertosono::where('id_periode', $periode_pengetesan_id)
                             ->whereNotIn('status_tes', [
                                 StatusTesKertosono::TUNDA->value,
                                 StatusTesKertosono::PRA_TES->value,
@@ -367,7 +367,7 @@ class HasilTesKertosono extends Page implements HasTable
                     ->exporter(HasilTesKertosonoExporter::class)
                     ->modifyQueryUsing(fn (Builder $query) => $query->with('siswa')
                         ->withHasilSistem()
-                        ->where('periode_id', $periode_pengetesan_id)
+                        ->where('id_periode', $periode_pengetesan_id)
                     )
             ])
             ->bulkActions([

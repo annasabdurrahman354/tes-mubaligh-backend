@@ -15,7 +15,7 @@ class HasilTesKertosonoExporter extends Exporter
     public static function getColumns(): array
     {
         return [
-            ExportColumn::make('periode_id')
+            ExportColumn::make('id_periode')
                 ->label('Periode'),
 
             ExportColumn::make('nomor_cocard')

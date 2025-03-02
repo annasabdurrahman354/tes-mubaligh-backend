@@ -39,14 +39,14 @@ class Periode extends Model
         'bulan' => BulanNomor::class,
     ];
 
-    public function scopeWithStatusTesPesertaKediri(Builder $query, $ponpes_id = null): void
+    public function scopeWithStatusTesPesertaKediri(Builder $query, $id_ponpes = null): void
     {
         $periodeId = getPeriodeTes();
 
-        $baseQuery = function ($query) use ($periodeId, $ponpes_id) {
-            $query->where('periode_id', $periodeId);
-            if ($ponpes_id !== null) {
-                $query->where('ponpes_id', $ponpes_id);
+        $baseQuery = function ($query) use ($periodeId, $id_ponpes) {
+            $query->where('id_periode', $periodeId);
+            if ($id_ponpes !== null) {
+                $query->where('id_ponpes', $id_ponpes);
             }
         };
 
@@ -167,14 +167,14 @@ class Periode extends Model
         ]);
     }
 
-    public function scopeWithStatusTesPesertaKertosono(Builder $query, $ponpes_id = null): void
+    public function scopeWithStatusTesPesertaKertosono(Builder $query, $id_ponpes = null): void
     {
         $periodeId = getPeriodeTes();
 
-        $baseQuery = function ($query) use ($periodeId, $ponpes_id) {
-            $query->where('periode_id', $periodeId);
-            if ($ponpes_id !== null) {
-                $query->where('ponpes_id', $ponpes_id);
+        $baseQuery = function ($query) use ($periodeId, $id_ponpes) {
+            $query->where('id_periode', $periodeId);
+            if ($id_ponpes !== null) {
+                $query->where('id_ponpes', $id_ponpes);
             }
         };
 
@@ -282,12 +282,12 @@ class Periode extends Model
 
     public function pesertaKediri()
     {
-        return $this->hasMany(PesertaKediri::class, 'periode_id', 'id_periode');
+        return $this->hasMany(PesertaKediri::class, 'id_periode', 'id_periode');
     }
 
     public function pesertaKertosono()
     {
-        return $this->hasMany(PesertaKertosono::class, 'periode_id', 'id_periode');
+        return $this->hasMany(PesertaKertosono::class, 'id_periode', 'id_periode');
     }
 
     public static function getColumns()

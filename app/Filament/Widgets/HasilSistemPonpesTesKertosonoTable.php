@@ -19,7 +19,7 @@ class HasilSistemPonpesTesKertosonoTable extends BaseWidget
             ->heading('Hasil Sistem Tes Kertosono')
             ->query(
                 Ponpes::whereHas('pesertaKertosono', function ($query) {
-                    $query->where('periode_id', getPeriodeTes());
+                    $query->where('id_periode', getPeriodeTes());
                 })
                 ->withPesertaKertosonoHasilSistemCounts()
             )

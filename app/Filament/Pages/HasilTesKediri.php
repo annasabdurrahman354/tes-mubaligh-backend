@@ -50,7 +50,7 @@ class HasilTesKediri extends Page implements HasTable
                 PesertaKediri::query()
                     ->with('siswa')
                     ->withHasilSistem()
-                    ->where('periode_id', $periode_pengetesan_id)
+                    ->where('id_periode', $periode_pengetesan_id)
                     ->whereNotIn('status_tes', [
                         StatusTesKediri::PRA_TES->value,
                         StatusTesKediri::APPROVED_BARANG->value,
@@ -188,7 +188,7 @@ class HasilTesKediri extends Page implements HasTable
                     ->label('Sesuaikan Hasil')
                     ->action(function () use ($periode_pengetesan_id): void {
                         DB::table('tes_santri')
-                            ->where('periode_id', $periode_pengetesan_id)
+                            ->where('id_periode', $periode_pengetesan_id)
                             ->whereNotIn('status_tes', [
                                 StatusTesKediri::PRA_TES->value,
                                 StatusTesKediri::APPROVED_MATERI->value,
@@ -234,7 +234,7 @@ class HasilTesKediri extends Page implements HasTable
                 Action::make('reset_hasil_sistem')
                     ->label('Reset Hasil')
                     ->action(function () use ($periode_pengetesan_id): void {
-                        PesertaKediri::where('periode_id', $periode_pengetesan_id)
+                        PesertaKediri::where('id_periode', $periode_pengetesan_id)
                             ->whereNotIn('status_tes', [
                                 StatusTesKediri::PRA_TES->value,
                                 StatusTesKediri::APPROVED_BARANG->value,
@@ -256,7 +256,7 @@ class HasilTesKediri extends Page implements HasTable
                     ->exporter(HasilTesKediriExporter::class)
                     ->modifyQueryUsing(fn (Builder $query) => $query->with('siswa')
                         ->withHasilSistem()
-                        ->where('periode_id', $periode_pengetesan_id)
+                        ->where('id_periode', $periode_pengetesan_id)
                     )
             ])
             ->actions([

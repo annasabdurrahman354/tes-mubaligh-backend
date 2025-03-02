@@ -141,7 +141,7 @@ class AkhlakKediri extends Model
                                             });
                                      })
                                     ->when($get('bulan') != null, function ($q) use ($get) {
-                                        return $q->where('periode_id', $get('tahun').$get('bulan'));
+                                        return $q->where('id_periode', $get('tahun').$get('bulan'));
                                     })
                                     ->limit(10)
                                     ->get()

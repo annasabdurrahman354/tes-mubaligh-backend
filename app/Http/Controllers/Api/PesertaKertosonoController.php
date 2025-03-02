@@ -14,7 +14,7 @@ class PesertaKertosonoController extends Controller
 {
     /**
      * Get all Peserta Kertosono with filtering for kelompok, siswa's jenis_kelamin,
-     * always sorting by siswa.nama (ascending), and filtering by periode_id '2021'.
+     * always sorting by siswa.nama (ascending), and filtering by id_periode '2021'.
      */
     public function index(Request $request)
     {
@@ -22,7 +22,7 @@ class PesertaKertosonoController extends Controller
 
         $pesertaQuery = QueryBuilder::for(PesertaKertosono::class)
             ->allowedFilters($this->allowedFilters())
-            ->where('periode_id', $periode_pengetesan_id)
+            ->where('id_periode', $periode_pengetesan_id)
             ->tap(fn($query) => $query->withHasilSistem()) // Ensures scope is applied
             ->with(['siswa']) // Eager loading siswa for performance
             ->withCount('akademik'); // Count related akademik records
@@ -40,7 +40,7 @@ class PesertaKertosonoController extends Controller
                     break;
 
                 case 'simak-terbanyak':
-                    $maxAkademikCount = PesertaKertosono::where('periode_id', $periode_pengetesan_id)
+                    $maxAkademikCount = PesertaKertosono::where('id_periode', $periode_pengetesan_id)
                         ->withCount('akademik')
                         ->get()
                         ->max('akademik_count');
@@ -49,7 +49,7 @@ class PesertaKertosonoController extends Controller
                     break;
 
                 case 'simak-tersedikit':
-                    $minAkademikCount = PesertaKertosono::where('periode_id', $periode_pengetesan_id)
+                    $minAkademikCount = PesertaKertosono::where('id_periode', $periode_pengetesan_id)
                         ->withCount('akademik')
                         ->get()
                         ->min('akademik_count');
@@ -83,7 +83,7 @@ class PesertaKertosonoController extends Controller
 
         $peserta = PesertaKertosono::whereHas('siswa', fn($query) => $query->where('rfid', $rfid))
             ->join('tb_personal_data3', 'tb_tes_santri.nispn', '=', 'tb_personal_data3.nispn')
-            ->where('periode_id', $periode_pengetesan_id)
+            ->where('id_periode', $periode_pengetesan_id)
             ->first();
 
         if (!$peserta) {
@@ -119,7 +119,7 @@ class PesertaKertosonoController extends Controller
 
         return [
             'id' => $peserta->id_tes_santri,
-            'periode_id' => $peserta->periode_id,
+            'id_periode' => $peserta->id_periode,
             'nispn' => $peserta->nispn,
             'nama_lengkap' => $peserta->siswa->nama_lengkap,
             'nama_panggilan' => $peserta->siswa->nama_panggilan,

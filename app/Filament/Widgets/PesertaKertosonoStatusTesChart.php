@@ -35,11 +35,11 @@ class PesertaKertosonoStatusTesChart extends ApexChartWidget
 
     protected function getFilters(): ?array
     {
-        $periode_id = getPeriodeTes();
+        $id_periode = getPeriodeTes();
         return array_merge(
             [null => 'Semua Ponpes'],
-            Ponpes::whereHas('pesertaKertosono', function ($query) use ($periode_id) {
-                    $query->where('periode_id', $periode_id);
+            Ponpes::whereHas('pesertaKertosono', function ($query) use ($id_periode) {
+                    $query->where('id_periode', $id_periode);
                 })
                 ->orderBy('n_ponpes')
                 ->get()
@@ -55,9 +55,9 @@ class PesertaKertosonoStatusTesChart extends ApexChartWidget
     protected function getOptions(): array
     {
         $activeFilter = $this->filter;
-        $periode_id = getPeriodeTes();
+        $id_periode = getPeriodeTes();
 
-        $periode = Periode::where('id_periode', $periode_id)
+        $periode = Periode::where('id_periode', $id_periode)
             ->withStatusTesPesertaKertosono($activeFilter)
             ->first();
 

@@ -39,7 +39,7 @@ class PengumumanTesKediri extends Page implements HasForms
     public function form(Form $form): Form
     {
         $periode_pengetesan_id = getPeriodeTes();
-        $pesertaAktifCount = PesertaKediri::where('periode_id', $periode_pengetesan_id)
+        $pesertaAktifCount = PesertaKediri::where('id_periode', $periode_pengetesan_id)
             ->where('status_tes', StatusTesKediri::AKTIF->value)
             ->count();
 
@@ -93,7 +93,7 @@ class PengumumanTesKediri extends Page implements HasForms
 
         $this->pengumuman = PesertaKediri::with(['siswa', 'ponpes', 'akhlak', 'akademik'])
             ->withHasilSistem()
-            ->where('periode_id', $periode_pengetesan_id)
+            ->where('id_periode', $periode_pengetesan_id)
             ->whereHas('siswa', function ($query) {
                 $query->where('jenis_kelamin', $this->data['jenis_kelamin']);
             })

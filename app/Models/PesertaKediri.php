@@ -27,8 +27,8 @@ class PesertaKediri extends Model
     protected $primaryKey = 'id_tes_santri';
 
     protected $fillable = [
-        'ponpes_id',
-        'periode_id',
+        'id_ponpes',
+        'id_periode',
         'nispn',
         'tahap',
         'kelompok',
@@ -48,14 +48,14 @@ class PesertaKediri extends Model
     protected function recordTitle(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->siswa->nama_lengkap.' ('.$this->periode_id.')',
+            get: fn () => $this->siswa->nama_lengkap.' ('.$this->id_periode.')',
         );
     }
 
     protected function riwayatTes(): Attribute
     {
         $riwayat_tes = PesertaKediri::where('nispn', $this->nispn)
-            ->where('periode_id', '<', $this->periode_id)
+            ->where('id_periode', '<', $this->id_periode)
             ->count();
 
         return Attribute::make(
@@ -91,12 +91,12 @@ class PesertaKediri extends Model
 
     public function ponpes()
     {
-        return $this->belongsTo(Ponpes::class, 'ponpes_id', 'id_ponpes');
+        return $this->belongsTo(Ponpes::class, 'id_ponpes', 'id_ponpes');
     }
 
     public function periode()
     {
-        return $this->belongsTo(Periode::class, 'periode_id', 'id_periode');
+        return $this->belongsTo(Periode::class, 'id_periode', 'id_periode');
     }
 
     public function akhlak()
@@ -156,7 +156,7 @@ class PesertaKediri extends Model
                 ->sortable()
                 ->toggleable(isToggledHiddenByDefault: true),
 
-            TextColumn::make('periode_id')
+            TextColumn::make('id_periode')
                 ->label('Periode')
                 ->sortable()
                 ->searchable(),
@@ -282,7 +282,7 @@ class PesertaKediri extends Model
             Section::make('Peserta')
                 ->description('Informasi terkait peserta tes.')
                 ->schema([
-                    Select::make('periode_id')
+                    Select::make('id_periode')
                         ->label('Periode')
                         ->relationship('periode', 'id_periode')
                         ->searchable()
@@ -295,7 +295,7 @@ class PesertaKediri extends Model
                         ->required()
                         ->unique(ignoreRecord: true, modifyRuleUsing: function (Unique $rule, Get $get, $state) {
                             return $rule
-                                ->where('periode_id', $get('periode_id'))
+                                ->where('id_periode', $get('id_periode'))
                                 ->where('nispn', $state)
                                 ->where('tahap', Tahap::KEDIRI->value);
                         })
@@ -307,7 +307,7 @@ class PesertaKediri extends Model
                     TextInput::make('nomor_cocard')
                         ->label('Nomor Cocard')
                         ->numeric(),
-                    Select::make('ponpes_id')
+                    Select::make('id_ponpes')
                         ->label('Asal Pondok')
                         ->relationship('ponpes', 'n_ponpes')
                         ->preload()
