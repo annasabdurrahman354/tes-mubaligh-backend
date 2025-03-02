@@ -33,12 +33,8 @@ class PesertaKediriController extends Controller
                     ->whereColumn('tb_personal_data.nispn', 'tb_tes_santri.nispn')
                     ->limit(1);
             })
-            ->orderBy(function ($query) {
-                $query->select('nama_lengkap')
-                    ->from('tb_personal_data')
-                    ->whereColumn('tb_personal_data.nispn', 'tb_tes_santri.nispn')
-                    ->limit(1);
-            })
+            ->orderBy('kelompok', 'ASC')
+            ->orderByRaw('CONVERT(nomor_cocard, SIGNED) asc')
             ->withCount('akademik');
 
 
