@@ -24,18 +24,19 @@ class PesertaKediriController extends Controller
         $pesertaQuery = QueryBuilder::for(PesertaKediri::class)
             ->allowedFilters($this->allowedFilters())
             ->where('id_periode', $periode_pengetesan_id)
+            ->where('status_tes', 'aktif')
             ->tap(fn($query) => $query->withHasilSistem()) // Ensures scope is applied
             ->with(['siswa']) // Eager loading siswa for performance
             ->orderBy(function ($query) {
                 $query->select('jenis_kelamin')
-                    ->from('tb_personal_data3')
-                    ->whereColumn('tb_personal_data3.nispn', 'tb_tes_santri.nispn')
+                    ->from('tb_personal_data')
+                    ->whereColumn('tb_personal_data.nispn', 'tb_tes_santri.nispn')
                     ->limit(1);
             })
             ->orderBy(function ($query) {
                 $query->select('nama_lengkap')
-                    ->from('tb_personal_data3')
-                    ->whereColumn('tb_personal_data3.nispn', 'tb_tes_santri.nispn')
+                    ->from('tb_personal_data')
+                    ->whereColumn('tb_personal_data.nispn', 'tb_tes_santri.nispn')
                     ->limit(1);
             })
             ->withCount('akademik');
@@ -96,7 +97,7 @@ class PesertaKediriController extends Controller
         $periode_pengetesan_id = getPeriodeTes();
 
         $peserta = PesertaKediri::whereHas('siswa', fn($query) => $query->where('rfid', $rfid))
-            ->join('tb_personal_data3', 'tb_tes_santri.nispn', '=', 'tb_personal_data3.nispn')
+            ->join('tb_personal_data', 'tb_tes_santri.nispn', '=', 'tb_personal_data.nispn')
             ->where('id_periode', $periode_pengetesan_id)
             ->first();
 

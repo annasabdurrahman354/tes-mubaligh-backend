@@ -23,6 +23,7 @@ class PesertaKertosonoController extends Controller
         $pesertaQuery = QueryBuilder::for(PesertaKertosono::class)
             ->allowedFilters($this->allowedFilters())
             ->where('id_periode', $periode_pengetesan_id)
+            ->where('status_tes', 'aktif')
             ->tap(fn($query) => $query->withHasilSistem()) // Ensures scope is applied
             ->with(['siswa']) // Eager loading siswa for performance
             ->withCount('akademik'); // Count related akademik records
@@ -82,7 +83,7 @@ class PesertaKertosonoController extends Controller
         $periode_pengetesan_id = getPeriodeTes();
 
         $peserta = PesertaKertosono::whereHas('siswa', fn($query) => $query->where('rfid', $rfid))
-            ->join('tb_personal_data3', 'tb_tes_santri.nispn', '=', 'tb_personal_data3.nispn')
+            ->join('tb_personal_data', 'tb_tes_santri.nispn', '=', 'tb_personal_data.nispn')
             ->where('id_periode', $periode_pengetesan_id)
             ->first();
 
