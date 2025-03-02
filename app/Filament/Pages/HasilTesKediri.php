@@ -201,13 +201,13 @@ class HasilTesKediri extends Page implements HasTable
                                 'status_tes' => DB::raw('
                                     CASE
                                         WHEN (
-                                            (SELECT COUNT(*) FROM tes_akademik_kediri WHERE tes_akademik_kediri.tes_santri_id = tes_santri.id)
+                                            (SELECT COUNT(*) FROM tes_akademik_kediri WHERE tes_akademik_kediri.tes_santri_id = tb_tes_santri.id_tes_santri)
                                         ) = 0 THEN status_tes
                                         WHEN (
-                                            (SELECT AVG(nilai_makna) FROM tes_akademik_kediri WHERE tes_akademik_kediri.tes_santri_id = tes_santri.id) +
-                                            (SELECT AVG(nilai_keterangan) FROM tes_akademik_kediri WHERE tes_akademik_kediri.tes_santri_id = tes_santri.id) +
-                                            (SELECT AVG(nilai_penjelasan) FROM tes_akademik_kediri WHERE tes_akademik_kediri.tes_santri_id = tes_santri.id) +
-                                            (SELECT AVG(nilai_pemahaman) FROM tes_akademik_kediri WHERE tes_akademik_kediri.tes_santri_id = tes_santri.id)
+                                            (SELECT AVG(nilai_makna) FROM tes_akademik_kediri WHERE tes_akademik_kediri.tes_santri_id = tb_tes_santri.id_tes_santri) +
+                                            (SELECT AVG(nilai_keterangan) FROM tes_akademik_kediri WHERE tes_akademik_kediri.tes_santri_id = tb_tes_santri.id_tes_santri) +
+                                            (SELECT AVG(nilai_penjelasan) FROM tes_akademik_kediri WHERE tes_akademik_kediri.tes_santri_id = tb_tes_santri.id_tes_santri) +
+                                            (SELECT AVG(nilai_pemahaman) FROM tes_akademik_kediri WHERE tes_akademik_kediri.tes_santri_id = tb_tes_santri.id_tes_santri)
                                         ) / 4 >= 70 THEN "'.\App\Enums\HasilTes::LULUS->value.'"
                                         ELSE "'.\App\Enums\HasilTes::TIDAK_LULUS_AKADEMIK->value.'"
                                     END
@@ -215,13 +215,13 @@ class HasilTesKediri extends Page implements HasTable
                                 'status_kelanjutan' => DB::raw('
                                     CASE
                                         WHEN (
-                                            (SELECT COUNT(*) FROM tes_akademik_kediri WHERE tes_akademik_kediri.tes_santri_id = tes_santri.id)
+                                            (SELECT COUNT(*) FROM tes_akademik_kediri WHERE tes_akademik_kediri.tes_santri_id = tb_tes_santri.id_tes_santri)
                                         ) = 0 THEN status_kelanjutan
                                         WHEN (
-                                            (SELECT AVG(nilai_makna) FROM tes_akademik_kediri WHERE tes_akademik_kediri.tes_santri_id = tes_santri.id) +
-                                            (SELECT AVG(nilai_keterangan) FROM tes_akademik_kediri WHERE tes_akademik_kediri.tes_santri_id = tes_santri.id) +
-                                            (SELECT AVG(nilai_penjelasan) FROM tes_akademik_kediri WHERE tes_akademik_kediri.tes_santri_id = tes_santri.id) +
-                                            (SELECT AVG(nilai_pemahaman) FROM tes_akademik_kediri WHERE tes_akademik_kediri.tes_santri_id = tes_santri.id)
+                                            (SELECT AVG(nilai_makna) FROM tes_akademik_kediri WHERE tes_akademik_kediri.tes_santri_id = tb_tes_santri.id_tes_santri) +
+                                            (SELECT AVG(nilai_keterangan) FROM tes_akademik_kediri WHERE tes_akademik_kediri.tes_santri_id = tb_tes_santri.id_tes_santri) +
+                                            (SELECT AVG(nilai_penjelasan) FROM tes_akademik_kediri WHERE tes_akademik_kediri.tes_santri_id = tb_tes_santri.id_tes_santri) +
+                                            (SELECT AVG(nilai_pemahaman) FROM tes_akademik_kediri WHERE tes_akademik_kediri.tes_santri_id = tb_tes_santri.id_tes_santri)
                                         ) / 4 >= 70 THEN "'.\App\Enums\StatusKelanjutanKediri::KERTOSONO->value.'"
                                         ELSE "'.\App\Enums\StatusKelanjutanKediri::LENGKONG->value.'"
                                     END

@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::disableForeignKeyConstraints();
 
-        Schema::create('tes_santri', function (Blueprint $table) {
-            $table->id();
+        Schema::create('tb_tes_santri', function (Blueprint $table) {
+            $table->id('id_tes');
             $table->integer('ponpes_id');
             $table->integer('periode_id');
             $table->string('nispn');

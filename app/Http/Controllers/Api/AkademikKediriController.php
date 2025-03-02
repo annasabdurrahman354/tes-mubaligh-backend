@@ -15,7 +15,7 @@ class AkademikKediriController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'tes_santri_id' => 'required|exists:tes_santri,id',
+            'tes_santri_id' => 'required|exists:tb_tes_santri,id_tes_santri',
             'nilai_makna' => 'required|numeric|min:0|max:100',
             'nilai_keterangan' => 'required|numeric|min:0|max:100',
             'nilai_penjelasan' => 'required|numeric|min:0|max:100',

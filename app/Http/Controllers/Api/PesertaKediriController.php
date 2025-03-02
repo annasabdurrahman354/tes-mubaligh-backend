@@ -29,13 +29,13 @@ class PesertaKediriController extends Controller
             ->orderBy(function ($query) {
                 $query->select('jenis_kelamin')
                     ->from('tb_personal_data3')
-                    ->whereColumn('tb_personal_data3.nispn', 'tes_santri.nispn')
+                    ->whereColumn('tb_personal_data3.nispn', 'tb_tes_santri.nispn')
                     ->limit(1);
             })
             ->orderBy(function ($query) {
                 $query->select('nama_lengkap')
                     ->from('tb_personal_data3')
-                    ->whereColumn('tb_personal_data3.nispn', 'tes_santri.nispn')
+                    ->whereColumn('tb_personal_data3.nispn', 'tb_tes_santri.nispn')
                     ->limit(1);
             })
             ->withCount('akademik');
@@ -96,7 +96,7 @@ class PesertaKediriController extends Controller
         $periode_pengetesan_id = getPeriodeTes();
 
         $peserta = PesertaKediri::whereHas('siswa', fn($query) => $query->where('rfid', $rfid))
-            ->join('tb_personal_data3', 'tes_santri.nispn', '=', 'tb_personal_data3.nispn')
+            ->join('tb_personal_data3', 'tb_tes_santri.nispn', '=', 'tb_personal_data3.nispn')
             ->where('periode_id', $periode_pengetesan_id)
             ->first();
 
@@ -136,7 +136,7 @@ class PesertaKediriController extends Controller
         $telah_disimak = $peserta->akademik->contains(fn($akademik) => $akademik->guru_id === $currentUserId);
 
         return [
-            'id' => $peserta->id,
+            'id' => $peserta->id_tes_santri,
             'periode_id' => $peserta->periode_id,
             'nispn' => $peserta->nispn,
             'nama_lengkap' => $peserta->siswa->nama_lengkap,

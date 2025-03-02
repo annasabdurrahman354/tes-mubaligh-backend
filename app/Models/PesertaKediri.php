@@ -23,7 +23,8 @@ class PesertaKediri extends Model
 {
     use HasFactory;
 
-    protected $table = 'tes_santri';
+    protected $table = 'tb_tes_santri';
+    protected $primaryKey = 'id_tes_santri';
 
     protected $fillable = [
         'ponpes_id',
@@ -112,16 +113,16 @@ class PesertaKediri extends Model
     {
         $query->addSelect([
             'avg_nilai_makna' => AkademikKediri::selectRaw('AVG(nilai_makna)')
-                ->whereColumn('tes_santri_id', 'tes_santri.id'),
+                ->whereColumn('tes_santri_id', 'tb_tes_santri.id_tes_santri'),
 
             'avg_nilai_keterangan' => AkademikKediri::selectRaw('AVG(nilai_keterangan)')
-                ->whereColumn('tes_santri_id', 'tes_santri.id'),
+                ->whereColumn('tes_santri_id', 'tb_tes_santri.id_tes_santri'),
 
             'avg_nilai_penjelasan' => AkademikKediri::selectRaw('AVG(nilai_penjelasan)')
-                ->whereColumn('tes_santri_id', 'tes_santri.id'),
+                ->whereColumn('tes_santri_id', 'tb_tes_santri.id_tes_santri'),
 
             'avg_nilai_pemahaman' => AkademikKediri::selectRaw('AVG(nilai_pemahaman)')
-                ->whereColumn('tes_santri_id', 'tes_santri.id'),
+                ->whereColumn('tes_santri_id', 'tb_tes_santri.id_tes_santri'),
 
             'avg_nilai' => AkademikKediri::selectRaw('(
                 (AVG(nilai_makna)) +
@@ -129,10 +130,10 @@ class PesertaKediri extends Model
                 (AVG(nilai_penjelasan)) +
                 (AVG(nilai_pemahaman))
             ) / 4')
-                ->whereColumn('tes_santri_id', 'tes_santri.id'),
+                ->whereColumn('tes_santri_id', 'tb_tes_santri.id_tes_santri'),
 
             'hasil_sistem' => AkademikKediri::selectRaw("CASE
-                WHEN (SELECT COUNT(*) FROM tes_akademik_kediri WHERE tes_akademik_kediri.tes_santri_id = tes_santri.id) = 0
+                WHEN (SELECT COUNT(*) FROM tes_akademik_kediri WHERE tes_akademik_kediri.tes_santri_id = tb_tes_santri.id_tes_santri) = 0
                     THEN '".HasilSistem::BELUM_PENGETESAN->getLabel()."'
                 WHEN (
                     (AVG(nilai_makna) +
@@ -143,7 +144,7 @@ class PesertaKediri extends Model
                     THEN '".HasilSistem::LULUS->getLabel()."'
                 ELSE '".HasilSistem::TIDAK_LULUS_AKADEMIK->getLabel()."'
             END")
-                ->whereColumn('tes_santri_id', 'tes_santri.id'),
+                ->whereColumn('tes_santri_id', 'tb_tes_santri.id_tes_santri'),
         ]);
     }
 

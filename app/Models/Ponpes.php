@@ -57,11 +57,11 @@ class Ponpes extends Model
                 ->whereColumn('ponpes_id', 'tb_ponpes.id_ponpes')
                 ->whereHas('akademik')
                 ->whereIn('id', function ($subquery) {
-                    $subquery->select('tes_santri.id')
+                    $subquery->select('tb_tes_santri.id_tes_santri')
                         ->from('tes_santri')
-                        ->leftJoin('tes_akademik_kediri', 'tes_akademik_kediri.tes_santri_id', '=', 'tes_santri.id')
-                        ->whereColumn('tes_santri.ponpes_id', 'tb_ponpes.id_ponpes')
-                        ->groupBy('tes_santri.id')
+                        ->leftJoin('tes_akademik_kediri', 'tes_akademik_kediri.tes_santri_id', '=', 'tb_tes_santri.id_tes_santri')
+                        ->whereColumn('tb_tes_santri.ponpes_id', 'tb_ponpes.id_ponpes')
+                        ->groupBy('tb_tes_santri.id_tes_santri')
                         ->havingRaw("
                         CASE
                             WHEN COUNT(tes_akademik_kediri.id) = 0 THEN ?
@@ -79,11 +79,11 @@ class Ponpes extends Model
                 ->whereColumn('ponpes_id', 'tb_ponpes.id_ponpes')
                 ->whereHas('akademik')
                 ->whereIn('id', function ($subquery) {
-                    $subquery->select('tes_santri.id')
+                    $subquery->select('tb_tes_santri.id_tes_santri')
                         ->from('tes_santri')
-                        ->leftJoin('tes_akademik_kediri', 'tes_akademik_kediri.tes_santri_id', '=', 'tes_santri.id')
-                        ->whereColumn('tes_santri.ponpes_id', 'tb_ponpes.id_ponpes')
-                        ->groupBy('tes_santri.id')
+                        ->leftJoin('tes_akademik_kediri', 'tes_akademik_kediri.tes_santri_id', '=', 'tb_tes_santri.id_tes_santri')
+                        ->whereColumn('tb_tes_santri.ponpes_id', 'tb_ponpes.id_ponpes')
+                        ->groupBy('tb_tes_santri.id_tes_santri')
                         ->havingRaw("
                         CASE
                             WHEN COUNT(tes_akademik_kediri.id) = 0 THEN ?
@@ -110,11 +110,11 @@ class Ponpes extends Model
                 ->whereColumn('ponpes_id', 'tb_ponpes.id_ponpes')
                 ->whereHas('akademik')
                 ->whereIn('id', function ($subquery) {
-                    $subquery->select('tes_santri.id')
+                    $subquery->select('tb_tes_santri.id_tes_santri')
                         ->from('tes_santri')
-                        ->leftJoin('tes_akademik_kertosono', 'tes_akademik_kertosono.tes_santri_id', '=', 'tes_santri.id')
-                        ->whereColumn('tes_santri.ponpes_id', 'tb_ponpes.id_ponpes')
-                        ->groupBy('tes_santri.id')
+                        ->leftJoin('tes_akademik_kertosono', 'tes_akademik_kertosono.tes_santri_id', '=', 'tb_tes_santri.id_tes_santri')
+                        ->whereColumn('tb_tes_santri.ponpes_id', 'tb_ponpes.id_ponpes')
+                        ->groupBy('tb_tes_santri.id_tes_santri')
                         ->havingRaw('SUM(CASE WHEN penilaian = ? THEN 1 ELSE 0 END) >
                                  SUM(CASE WHEN penilaian = ? THEN 1 ELSE 0 END)', [
                             PenilaianKertosono::LULUS->value,
@@ -126,11 +126,11 @@ class Ponpes extends Model
                 ->whereColumn('ponpes_id', 'tb_ponpes.id_ponpes')
                 ->whereHas('akademik')
                 ->whereIn('id', function ($subquery) {
-                    $subquery->select('tes_santri.id')
+                    $subquery->select('tb_tes_santri.id_tes_santri')
                         ->from('tes_santri')
-                        ->leftJoin('tes_akademik_kertosono', 'tes_akademik_kertosono.tes_santri_id', '=', 'tes_santri.id')
-                        ->whereColumn('tes_santri.ponpes_id', 'tb_ponpes.id_ponpes')
-                        ->groupBy('tes_santri.id')
+                        ->leftJoin('tes_akademik_kertosono', 'tes_akademik_kertosono.tes_santri_id', '=', 'tb_tes_santri.id_tes_santri')
+                        ->whereColumn('tb_tes_santri.ponpes_id', 'tb_ponpes.id_ponpes')
+                        ->groupBy('tb_tes_santri.id_tes_santri')
                         ->havingRaw('SUM(CASE WHEN penilaian = ? THEN 1 ELSE 0 END) <=
                                  SUM(CASE WHEN penilaian = ? THEN 1 ELSE 0 END)', [
                             PenilaianKertosono::LULUS->value,
@@ -142,11 +142,11 @@ class Ponpes extends Model
                 ->whereColumn('ponpes_id', 'tb_ponpes.id_ponpes')
                 ->whereHas('akademik')
                 ->whereIn('id', function ($subquery) {
-                    $subquery->select('tes_santri.id')
+                    $subquery->select('tb_tes_santri.id_tes_santri')
                         ->from('tes_santri')
-                        ->leftJoin('tes_akademik_kertosono', 'tes_akademik_kertosono.tes_santri_id', '=', 'tes_santri.id')
-                        ->whereColumn('tes_santri.ponpes_id', 'tb_ponpes.id_ponpes')
-                        ->groupBy('tes_santri.id')
+                        ->leftJoin('tes_akademik_kertosono', 'tes_akademik_kertosono.tes_santri_id', '=', 'tb_tes_santri.id_tes_santri')
+                        ->whereColumn('tb_tes_santri.ponpes_id', 'tb_ponpes.id_ponpes')
+                        ->groupBy('tb_tes_santri.id_tes_santri')
                         ->havingRaw('SUM(CASE WHEN penilaian IN (?, ?) THEN 1 ELSE 0 END) > 0
                                  AND SUM(CASE WHEN penilaian = ? THEN 1 ELSE 0 END) =
                                      SUM(CASE WHEN penilaian = ? THEN 1 ELSE 0 END)', [

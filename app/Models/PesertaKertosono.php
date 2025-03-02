@@ -24,7 +24,8 @@ class PesertaKertosono extends Model
 {
     use HasFactory;
 
-    protected $table = 'tes_santri';
+    protected $table = 'tb_tes_santri';
+    protected $primaryKey = 'id_tes_santri';
 
     protected $fillable = [
         'ponpes_id',
@@ -138,11 +139,11 @@ class PesertaKertosono extends Model
     {
         $query->addSelect([
             'count_lulus' => AkademikKertosono::selectRaw('COUNT(*)')
-                ->whereColumn('tes_santri_id', 'tes_santri.id')
+                ->whereColumn('tes_santri_id', 'tb_tes_santri.id_tes_santri')
                 ->where('penilaian', PenilaianKertosono::LULUS->value),
 
             'count_tidak_lulus' => AkademikKertosono::selectRaw('COUNT(*)')
-                ->whereColumn('tes_santri_id', 'tes_santri.id')
+                ->whereColumn('tes_santri_id', 'tb_tes_santri.id_tes_santri')
                 ->where('penilaian', PenilaianKertosono::TIDAK_LULUS->value),
 
             'hasil_sistem' => AkademikKertosono::selectRaw("
@@ -175,7 +176,7 @@ class PesertaKertosono extends Model
 
                 HasilSistem::BELUM_PENGETESAN->getLabel() // Default case
             ])
-                ->whereColumn('tes_santri_id', 'tes_santri.id'),
+                ->whereColumn('tes_santri_id', 'tb_tes_santri.id_tes_santri'),
         ]);
     }
 

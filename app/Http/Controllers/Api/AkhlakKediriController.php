@@ -15,7 +15,7 @@ class AkhlakKediriController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'tes_santri_id' => 'required|exists:tes_santri,id',
+            'tes_santri_id' => 'required|exists:tb_tes_santri,id_tes_santri',
             'poin' => 'required|numeric|min:0|max:100',
             'catatan' => 'nullable|string|max:255',
         ], [

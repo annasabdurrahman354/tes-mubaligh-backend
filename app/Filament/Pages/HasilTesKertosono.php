@@ -285,31 +285,31 @@ class HasilTesKertosono extends Page implements HasTable
                                     CASE
                                         WHEN (
                                             (SELECT COUNT(*) FROM tes_akademik_kertosono
-                                             WHERE tes_akademik_kertosono.tes_santri_id = tes_santri.id
+                                             WHERE tes_akademik_kertosono.tes_santri_id = tb_tes_santri.id_tes_santri
                                              AND tes_akademik_kertosono.penilaian = '" . PenilaianKertosono::LULUS->value . "')
                                         ) > (
                                             SELECT COUNT(*) FROM tes_akademik_kertosono
-                                            WHERE tes_akademik_kertosono.tes_santri_id = tes_santri.id
+                                            WHERE tes_akademik_kertosono.tes_santri_id = tb_tes_santri.id_tes_santri
                                             AND tes_akademik_kertosono.penilaian = '" . PenilaianKertosono::TIDAK_LULUS->value . "'
                                         )
                                         THEN '" . \App\Enums\HasilTes::LULUS->value . "'
                                         WHEN (
                                             (SELECT COUNT(*) FROM tes_akademik_kertosono
-                                             WHERE tes_akademik_kertosono.tes_santri_id = tes_santri.id
+                                             WHERE tes_akademik_kertosono.tes_santri_id = tb_tes_santri.id_tes_santri
                                              AND tes_akademik_kertosono.penilaian = '" . PenilaianKertosono::TIDAK_LULUS->value . "')
                                         ) > (
                                             SELECT COUNT(*) FROM tes_akademik_kertosono
-                                            WHERE tes_akademik_kertosono.tes_santri_id = tes_santri.id
+                                            WHERE tes_akademik_kertosono.tes_santri_id = tb_tes_santri.id_tes_santri
                                             AND tes_akademik_kertosono.penilaian = '" . PenilaianKertosono::LULUS->value . "'
                                         )
                                         THEN '" . \App\Enums\HasilTes::TIDAK_LULUS_AKADEMIK->value . "'
                                         WHEN (
                                             (SELECT COUNT(*) FROM tes_akademik_kertosono
-                                             WHERE tes_akademik_kertosono.tes_santri_id = tes_santri.id
+                                             WHERE tes_akademik_kertosono.tes_santri_id = tb_tes_santri.id_tes_santri
                                              AND tes_akademik_kertosono.penilaian = '" . PenilaianKertosono::TIDAK_LULUS->value . "')
                                         ) = (
                                             SELECT COUNT(*) FROM tes_akademik_kertosono
-                                            WHERE tes_akademik_kertosono.tes_santri_id = tes_santri.id
+                                            WHERE tes_akademik_kertosono.tes_santri_id = tb_tes_santri.id_tes_santri
                                             AND tes_akademik_kertosono.penilaian = '" . PenilaianKertosono::LULUS->value . "'
                                         )
                                         THEN '" . \App\Enums\HasilTes::PERLU_MUSYAWARAH->value . "'
@@ -320,21 +320,21 @@ class HasilTesKertosono extends Page implements HasTable
                                     CASE
                                         WHEN (
                                             (SELECT COUNT(*) FROM tes_akademik_kertosono
-                                             WHERE tes_akademik_kertosono.tes_santri_id = tes_santri.id
+                                             WHERE tes_akademik_kertosono.tes_santri_id = tb_tes_santri.id_tes_santri
                                              AND tes_akademik_kertosono.penilaian = '" . PenilaianKertosono::LULUS->value . "')
                                         ) > (
                                             SELECT COUNT(*) FROM tes_akademik_kertosono
-                                            WHERE tes_akademik_kertosono.tes_santri_id = tes_santri.id
+                                            WHERE tes_akademik_kertosono.tes_santri_id = tb_tes_santri.id_tes_santri
                                             AND tes_akademik_kertosono.penilaian = '" . PenilaianKertosono::TIDAK_LULUS->value . "'
                                         )
                                         THEN '" . \App\Enums\StatusKelanjutanKertosono::KEDIRI->value . "'
                                         WHEN (
                                             (SELECT COUNT(*) FROM tes_akademik_kertosono
-                                             WHERE tes_akademik_kertosono.tes_santri_id = tes_santri.id
+                                             WHERE tes_akademik_kertosono.tes_santri_id = tb_tes_santri.id_tes_santri
                                              AND tes_akademik_kertosono.penilaian = '" . PenilaianKertosono::TIDAK_LULUS->value . "')
                                         ) > (
                                             SELECT COUNT(*) FROM tes_akademik_kertosono
-                                            WHERE tes_akademik_kertosono.tes_santri_id = tes_santri.id
+                                            WHERE tes_akademik_kertosono.tes_santri_id = tb_tes_santri.id_tes_santri
                                             AND tes_akademik_kertosono.penilaian = '" . PenilaianKertosono::LULUS->value . "'
                                         )
                                         THEN '" . \App\Enums\StatusKelanjutanKertosono::LENGKONG->value . "'
