@@ -101,7 +101,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasName, 
             ->whereHas('peserta', function ($query) use ($periodePengetesanId) {
                 $query->where('id_periode', $periodePengetesanId)
                     ->whereHas('siswa', function ($siswaQuery) {
-                        $siswaQuery->where('jenis_kelamin', JenisKelamin::LAKI_LAKI);
+                        $siswaQuery->where('jenis_kelamin', JenisKelamin::LAKI_LAKI->value);
                     });
             })
             ->count();
@@ -115,7 +115,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasName, 
             ->whereHas('peserta', function ($query) use ($periodePengetesanId) {
                 $query->where('id_periode', $periodePengetesanId)
                     ->whereHas('siswa', function ($siswaQuery) {
-                        $siswaQuery->where('jenis_kelamin', JenisKelamin::PEREMPUAN);
+                        $siswaQuery->where('jenis_kelamin', JenisKelamin::PEREMPUAN->value);
                     });
             })
             ->count();
@@ -140,7 +140,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasName, 
             ->whereHas('peserta', function ($query) use ($periodePengetesanId) {
                 $query->where('id_periode', $periodePengetesanId)
                     ->whereHas('siswa', function ($siswaQuery) {
-                        $siswaQuery->where('jenis_kelamin', JenisKelamin::LAKI_LAKI);
+                        $siswaQuery->where('jenis_kelamin', JenisKelamin::LAKI_LAKI->value);
                     });
             })
             ->count();
@@ -154,7 +154,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasName, 
             ->whereHas('peserta', function ($query) use ($periodePengetesanId) {
                 $query->where('id_periode', $periodePengetesanId)
                     ->whereHas('siswa', function ($siswaQuery) {
-                        $siswaQuery->where('jenis_kelamin', JenisKelamin::PEREMPUAN);
+                        $siswaQuery->where('jenis_kelamin', JenisKelamin::PEREMPUAN->value);
                     });
             })
             ->count();

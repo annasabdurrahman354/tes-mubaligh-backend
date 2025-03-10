@@ -90,7 +90,7 @@ class AkademikKertosono extends Model
 
     public function peserta()
     {
-        return $this->belongsTo(PesertaKertosono::class, 'tes_santri_id');
+        return $this->belongsTo(PesertaKertosono::class, 'tes_santri_id', 'id_tes_santri');
     }
 
     public function guru()

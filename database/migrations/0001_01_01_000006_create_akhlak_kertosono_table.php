@@ -15,7 +15,7 @@ return new class extends Migration
 
         Schema::create('tes_akhlak_kertosono', function (Blueprint $table) {
             $table->ulid('id')->primary();
-            $table->foreignId('tes_santri_id')->references('id')->on('tes_santri')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('tes_santri_id')->references('id_tes_santri')->on('tb_tes_santri')->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('guru_id')->references('id')->on('tes_users')->cascadeOnDelete()->cascadeOnUpdate();
             $table->string('catatan');
             $table->timestamps();

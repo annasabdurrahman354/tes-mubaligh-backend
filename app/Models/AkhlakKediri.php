@@ -52,7 +52,7 @@ class AkhlakKediri extends Model
 
     public function peserta()
     {
-        return $this->belongsTo(PesertaKediri::class, 'tes_santri_id');
+        return $this->belongsTo(PesertaKediri::class, 'tes_santri_id', 'id_tes_santri');
     }
 
     public function guru()

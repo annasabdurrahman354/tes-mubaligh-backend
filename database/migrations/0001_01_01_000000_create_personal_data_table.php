@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('tb_personal_data3', function (Blueprint $table) {
+        Schema::create('tb_personal_data', function (Blueprint $table) {
             $table->string('nik')->primary(); // Primary key
             $table->string('nispn')->nullable();
             $table->string('nis')->nullable();

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::disableForeignKeyConstraints();
 
         Schema::create('tb_tes_santri', function (Blueprint $table) {
-            $table->id('id_tes');
+            $table->id('id_tes_santri');
             $table->integer('id_ponpes');
             $table->integer('id_periode');
             $table->string('nispn');

@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Enums\HasilSistem;
+use App\Enums\StatusTes;
 use App\Filters\FiltersNamaOrCocard;
 use App\Models\PesertaKertosono;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\QueryBuilder;
 use Spatie\QueryBuilder\AllowedFilter;
+use Illuminate\Support\Facades\Auth;
 
 class PesertaKertosonoController extends Controller
 {
@@ -23,7 +25,7 @@ class PesertaKertosonoController extends Controller
         $pesertaQuery = QueryBuilder::for(PesertaKertosono::class)
             ->allowedFilters($this->allowedFilters())
             ->where('id_periode', $periode_pengetesan_id)
-            ->where('status_tes', 'aktif')
+            ->where('status_tes', StatusTes::AKTIF->value)
             ->where('del_status', NULL)
             ->orderByRaw('CONVERT(nomor_cocard, SIGNED) asc')
             ->tap(fn($query) => $query->withHasilSistem()) // Ensures scope is applied
@@ -38,7 +40,7 @@ class PesertaKertosonoController extends Controller
             switch ($filterOption) {
                 case 'anda-simak':
                     $pesertaQuery->whereHas('akademik', function ($query) {
-                        $query->where('guru_id', auth()->id());
+                        $query->where('guru_id', Auth::id());
                     });
                     break;
 

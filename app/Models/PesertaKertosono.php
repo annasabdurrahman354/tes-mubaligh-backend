@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rules\Unique;
+use Illuminate\Database\Eloquent\Builder;
 
 class PesertaKertosono extends Model
 {
@@ -183,7 +184,7 @@ class PesertaKertosono extends Model
     public static function getColumns()
     {
         return [
-            TextColumn::make('id')
+            TextColumn::make('id_tes_santri')
                 ->label('ID')
                 ->sortable()
                 ->toggleable(isToggledHiddenByDefault: true),
@@ -195,7 +196,10 @@ class PesertaKertosono extends Model
 
             TextColumn::make('nomor_cocard')
                 ->label('No')
-                ->sortable(),
+                ->sortable(query: function (Builder $query, string $direction): Builder {
+                    return $query
+                        ->orderByRaw('CONVERT(nomor_cocard, SIGNED) '.$direction);
+                }),
 
             TextColumn::make('siswa.nama_lengkap')
                 ->label('Nama')
@@ -295,11 +299,11 @@ class PesertaKertosono extends Model
                 ->sortable()
                 ->searchable(),
 
-            TextColumn::make('created_at')
-                ->label('Created At')
-                ->dateTime()
-                ->sortable()
-                ->toggleable(isToggledHiddenByDefault: true),
+            //TextColumn::make('created_at')
+            //    ->label('Created At')
+            //    ->dateTime()
+            //    ->sortable()
+            //    ->toggleable(isToggledHiddenByDefault: true),
         ];
     }
 
@@ -381,6 +385,9 @@ class PesertaKertosono extends Model
     {
         static::addGlobalScope('tahap', function ($builder) {
             $builder->where('tahap', Tahap::KERTOSONO->value);
+        });
+        static::addGlobalScope('del_status', function ($builder) {
+            $builder->where('del_status', NULL);
         });
     }
 }

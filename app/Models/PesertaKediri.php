@@ -14,6 +14,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Get;
 use Filament\Tables\Columns\TextColumn;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -101,12 +102,12 @@ class PesertaKediri extends Model
 
     public function akhlak()
     {
-        return $this->hasMany(AkhlakKediri::class, 'tes_santri_id');
+        return $this->hasMany(AkhlakKediri::class, 'tes_santri_id', 'id_tes_santri');
     }
 
     public function akademik()
     {
-        return $this->hasMany(AkademikKediri::class, 'tes_santri_id');
+        return $this->hasMany(AkademikKediri::class, 'tes_santri_id', 'id_tes_santri');
     }
 
     public function scopeWithHasilSistem($query): void
@@ -151,7 +152,7 @@ class PesertaKediri extends Model
     public static function getColumns()
     {
         return [
-            TextColumn::make('id')
+            TextColumn::make('id_tes_santri')
                 ->label('ID')
                 ->sortable()
                 ->toggleable(isToggledHiddenByDefault: true),
@@ -168,7 +169,10 @@ class PesertaKediri extends Model
 
             TextColumn::make('nomor_cocard')
                 ->label('No')
-                ->sortable(),
+                ->sortable(query: function (Builder $query, string $direction): Builder {
+                    return $query
+                        ->orderByRaw('CONVERT(nomor_cocard, SIGNED) '.$direction);
+                }),
 
             TextColumn::make('siswa.nama_lengkap')
                 ->label('Nama')
@@ -268,11 +272,11 @@ class PesertaKediri extends Model
                 ->sortable()
                 ->searchable(),
 
-            TextColumn::make('created_at')
-                ->label('Created At')
-                ->dateTime()
-                ->sortable()
-                ->toggleable(isToggledHiddenByDefault: true),
+            //TextColumn::make('created_at')
+            //    ->label('Created At')
+            //    ->dateTime()
+            //    ->sortable()
+            //    ->toggleable(isToggledHiddenByDefault: true),
         ];
     }
 
@@ -356,6 +360,9 @@ class PesertaKediri extends Model
     {
         static::addGlobalScope('tahap', function ($builder) {
             $builder->where('tahap', Tahap::KEDIRI->value);
+        });
+        static::addGlobalScope('del_status', function ($builder) {
+            $builder->where('del_status', NULL);
         });
     }
 }

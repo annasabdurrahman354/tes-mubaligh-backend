@@ -59,15 +59,18 @@ class HasilTesKertosono extends Page implements HasTable
             )
             ->description(fn() => 'Rekap Kelulusan Tes Periode '.$periode['monthName'].' '.$periode['year'])
             ->columns([
-                TextColumn::make('id')
+                TextColumn::make('id_tes_santri')
                     ->label('ID')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('nomor_cocard')
                     ->label('No')
-                    ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(query: function (Builder $query, string $direction): Builder {
+                        return $query
+                            ->orderByRaw('CONVERT(nomor_cocard, SIGNED) '.$direction);
+                    }),
 
                 TextColumn::make('siswa.jenis_kelamin')
                     ->label('Jenis Kelamin')

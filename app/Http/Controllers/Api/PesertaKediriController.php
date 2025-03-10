@@ -3,13 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Enums\HasilSistem;
+use App\Enums\StatusTes;
 use App\Filters\FiltersNamaOrCocard;
 use App\Models\PesertaKediri;
-use App\Models\PesertaKertosono;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Spatie\QueryBuilder\QueryBuilder;
 use Spatie\QueryBuilder\AllowedFilter;
+use Illuminate\Support\Facades\Auth;
 
 class PesertaKediriController extends Controller
 {
@@ -24,7 +25,7 @@ class PesertaKediriController extends Controller
         $pesertaQuery = QueryBuilder::for(PesertaKediri::class)
             ->allowedFilters($this->allowedFilters())
             ->where('id_periode', $periode_pengetesan_id)
-            ->where('status_tes', 'aktif')
+            ->where('status_tes', StatusTes::AKTIF->value)
             ->where('del_status', NULL)
             ->tap(fn($query) => $query->withHasilSistem()) // Ensures scope is applied
             ->with(['siswa']) // Eager loading siswa for performance
@@ -46,12 +47,12 @@ class PesertaKediriController extends Controller
             switch ($filterOption) {
                 case 'anda-simak':
                     $pesertaQuery->whereHas('akademik', function ($query) {
-                        $query->where('guru_id', auth()->id());
+                        $query->where('guru_id',  Auth::id());
                     });
                     break;
 
                 case 'simak-terbanyak':
-                    $maxAkademikCount = PesertaKertosono::where('id_periode', $periode_pengetesan_id)
+                    $maxAkademikCount = PesertaKediri::where('id_periode', $periode_pengetesan_id)
                         ->withCount('akademik')
                         ->get()
                         ->max('akademik_count');
@@ -60,7 +61,7 @@ class PesertaKediriController extends Controller
                     break;
 
                 case 'simak-tersedikit':
-                    $minAkademikCount = PesertaKertosono::where('id_periode', $periode_pengetesan_id)
+                    $minAkademikCount = PesertaKediri::where('id_periode', $periode_pengetesan_id)
                         ->withCount('akademik')
                         ->get()
                         ->min('akademik_count');
