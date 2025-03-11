@@ -313,8 +313,9 @@ class PesertaKediri extends Model
                         ->numeric(),
                     Select::make('id_ponpes')
                         ->label('Asal Pondok')
-                        ->relationship('ponpes', 'n_ponpes')
-                        ->preload()
+                        ->options(Ponpes::with('daerah')->get()->mapWithKeys(function ($item) {
+                            return [$item->id => "{$item->n_ponpes} ({$item->daerah->n_daerah})"];
+                        }))
                         ->searchable()
                         ->required(),
                 ]),

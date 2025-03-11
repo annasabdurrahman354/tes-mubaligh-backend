@@ -128,12 +128,12 @@ class PesertaKertosono extends Model
 
     public function akhlak()
     {
-        return $this->hasMany(AkhlakKertosono::class, 'tes_santri_id');
+        return $this->hasMany(AkhlakKertosono::class, 'tes_santri_id', 'id_tes_santri');
     }
 
     public function akademik()
     {
-        return $this->hasMany(AkademikKertosono::class, 'tes_santri_id');
+        return $this->hasMany(AkademikKertosono::class, 'tes_santri_id', 'id_tes_santri');
     }
 
     public function scopeWithHasilSistem($query): void
@@ -338,8 +338,9 @@ class PesertaKertosono extends Model
                         ->numeric(),
                     Select::make('id_ponpes')
                         ->label('Asal Pondok')
-                        ->relationship('ponpes', 'n_ponpes')
-                        ->preload()
+                        ->options(Ponpes::with('daerah')->get()->mapWithKeys(function ($item) {
+                            return [$item->id => "{$item->n_ponpes} ({$item->daerah->n_daerah})"];
+                        }))
                         ->searchable()
                         ->required(),
                 ]),

@@ -4,8 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Enums\HasilSistem;
 use App\Enums\StatusTes;
-use App\Enums\StatusTesKediri;
-use App\Enums\StatusTesKertosono;
 use App\Models\PesertaKediri;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,7 +12,7 @@ use App\Models\PesertaKertosono;
 
 class StatisticsController extends Controller
 {
-    public function getStatistikPeserta($pesertaModel, $statusEnum)
+    public function getStatistikPeserta($pesertaModel)
     {
         $periode_pengetesan_id = getPeriodeTes();
         $periode = getYearAndMonthName($periode_pengetesan_id);
@@ -22,7 +20,13 @@ class StatisticsController extends Controller
 
         // Query utama
         $baseQuery = $pesertaModel::where('id_periode', $periode_pengetesan_id)
-            ->whereIn('status_tes', [$statusEnum::AKTIF->value, $statusEnum::LULUS->value, $statusEnum::TIDAK_LULUS_AKHLAK->value, $statusEnum::TIDAK_LULUS_AKADEMIK->value, $statusEnum::PERLU_MUSYAWARAH->value])
+            ->whereIn('status_tes', [
+                StatusTes::AKTIF->value,
+                StatusTes::LULUS->value,
+                StatusTes::TIDAK_LULUS_AKHLAK->value,
+                StatusTes::TIDAK_LULUS_AKADEMIK->value,
+                StatusTes::PERLU_MUSYAWARAH->value]
+            )
             ->where('del_status', NULL)
             ->withHasilSistem();
 
@@ -50,43 +54,37 @@ class StatisticsController extends Controller
             ]
         ], 200);
     }
-    
     public function getStatistikKediri(Request $request)
     {
-        return $this->getStatistikPeserta(PesertaKediri::class, StatusTesKediri::class);
+        return $this->getStatistikPeserta(PesertaKediri::class);
     }
 
     public function getStatistikKertosono(Request $request)
     {
-        return $this->getStatistikPeserta(PesertaKertosono::class, StatusTesKertosono::class);
+        return $this->getStatistikPeserta(PesertaKertosono::class);
     }
 
     private function calculateStats($pesertaData)
     {
         $totalActive = $pesertaData->where('status_tes', StatusTes::AKTIF->value)->count();
 
-        // Create a collection of akademik counts per peserta
-        $akademikCountsPerPeserta = $pesertaData->map(function($peserta) {
-            return [
-                'id' => $peserta->id_tes_santri,
-                'count' => $peserta->akademik->count()
-            ];
-        });
+        // Hitung jumlah akademik dengan lebih optimal
+        $akademikCounts = $pesertaData->pluck('akademik')->map(fn($akademik) => count($akademik));
+        $minAkademik = $akademikCounts->min() ?? 0;
+        $maxAkademik = $akademikCounts->max() ?? 0;
 
-        // Find minimum and maximum akademik counts
-        $minAkademik = $akademikCountsPerPeserta->min('count') ?? 0;
-        $maxAkademik = $akademikCountsPerPeserta->max('count') ?? 0;
+        // Hitung jumlah peserta yang memiliki akademik = minAkademik
+        $countPesertaMinAkademik = $pesertaData->filter(fn($peserta) => count($peserta->akademik) === $minAkademik)->count();
 
-        // Count peserta with min/max akademik
-        $countPesertaMinAkademik = $akademikCountsPerPeserta->where('count', $minAkademik)->count();
-        $countPesertaMaxAkademik = $akademikCountsPerPeserta->where('count', $maxAkademik)->count();
+        // Hitung jumlah peserta yang memiliki akademik = maxAkademik
+        $countPesertaMaxAkademik = $pesertaData->filter(fn($peserta) => count($peserta->akademik) === $maxAkademik)->count();
 
-        // Compute user-specific akademik count
+        // Hitung akademik yang berkaitan dengan user yang login
         $userAkademikCount = $pesertaData->flatMap(fn($peserta) => $peserta->akademik)
             ->where('guru_id', Auth::id())
             ->count();
 
-        // Get hasil sistem statistics
+        // Hitung hasil sistem tanpa perlu groupBy manual
         $hasilSistemStats = $pesertaData->countBy('hasil_sistem');
 
         return [

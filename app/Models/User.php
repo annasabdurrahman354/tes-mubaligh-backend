@@ -97,7 +97,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasName, 
     {
         $periodePengetesanId = getPeriodeTes();
 
-        return $this->akademikKertosono()
+        return $this->akademikKediri()
             ->whereHas('peserta', function ($query) use ($periodePengetesanId) {
                 $query->where('id_periode', $periodePengetesanId)
                     ->whereHas('siswa', function ($siswaQuery) {
