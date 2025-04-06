@@ -3,9 +3,7 @@
 namespace App\Models;
 
 use App\Enums\HasilSistem;
-use App\Enums\StatusKelanjutan;
 use App\Enums\StatusKelanjutanKediri;
-use App\Enums\StatusTes;
 use App\Enums\StatusTesKediri;
 use App\Enums\Tahap;
 use Filament\Forms\Components\Section;
@@ -13,6 +11,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Get;
+use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -42,8 +41,8 @@ class PesertaKediri extends Model
         'nomor_cocard' => 'integer',
         'tahap' => Tahap::class,
         //'kelompok' => KelompokKediri::class,
-        'status_tes' => StatusTes::class,
-        'status_kelanjutan' => StatusKelanjutan::class,
+        'status_tes' => StatusTesKediri::class,
+        'status_kelanjutan' => StatusKelanjutanKediri::class,
     ];
 
     protected function recordTitle(): Attribute
@@ -71,17 +70,17 @@ class PesertaKediri extends Model
         );
     }
 
-    protected function asalDaerahNama(): Attribute
+    protected function asalDaerah(): Attribute
     {
         return Attribute::make(
             get: fn () => $this->siswa->daerahSambung->n_daerah
         );
     }
 
-    protected function asalPondokNama(): Attribute
+    protected function asalPondokWithDaerah(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->ponpes->n_ponpes." (".$this->ponpes->daerah->n_daerah.")"
+            get: fn () => $this->ponpes->namaWithDaerah
         );
     }
 
@@ -183,6 +182,16 @@ class PesertaKediri extends Model
                 ->label('Jenis Kelamin')
                 ->badge()
                 ->sortable()
+                ->searchable(),
+
+            SelectColumn::make('id_ponpes')
+                ->label('Asal Pondok')
+                ->options(Ponpes::with('daerah')->get()->map(function ($item) {
+                    return [
+                        'id' => $item->id_ponpes,
+                        'name' => "{$item->n_ponpes} ({$item->daerah->n_daerah})"
+                    ];
+                })->pluck('name', 'id')->toArray())
                 ->searchable(),
 
             TextColumn::make('ponpes.n_ponpes')
@@ -294,14 +303,30 @@ class PesertaKediri extends Model
                         ->required(),
                     Select::make('nispn')
                         ->label('Siswa')
-                        ->relationship('siswa', 'nama_lengkap')
                         ->searchable()
+                        ->getSearchResultsUsing(fn (string $search): array =>
+                        Siswa::where('nama_lengkap', 'like', "%{$search}%")
+                            ->limit(50)
+                            ->get() // Fetch data before mapping
+                            ->map(function ($item) {
+                                return [
+                                    'id' => $item->nispn,
+                                    'name' => "{$item->nama_lengkap} ({$item->nispn})"
+                                ];
+                            })
+                            ->pluck('name', 'id')
+                            ->toArray()
+                        )
+                        ->getOptionLabelUsing(function ($value) {
+                            $siswa = Siswa::where('nispn', $value)->first();
+                            return "{$siswa->nama_lengkap} ({$siswa->nispn})";
+                        })
                         ->required()
                         ->unique(ignoreRecord: true, modifyRuleUsing: function (Unique $rule, Get $get, $state) {
                             return $rule
                                 ->where('id_periode', $get('id_periode'))
                                 ->where('nispn', $state)
-                                ->where('tahap', Tahap::KEDIRI->value);
+                                ->where('tahap', Tahap::KERTOSONO->value);
                         })
                         ->validationMessages([
                             'unique' => 'Santri sudah terdaftar tes kediri di periode tersebut.',
@@ -313,10 +338,20 @@ class PesertaKediri extends Model
                         ->numeric(),
                     Select::make('id_ponpes')
                         ->label('Asal Pondok')
-                        ->options(Ponpes::with('daerah')->get()->mapWithKeys(function ($item) {
-                            return [$item->id => "{$item->n_ponpes} ({$item->daerah->n_daerah})"];
-                        }))
+                        ->options(Ponpes::with('daerah')->get()->map(function ($item) {
+                            return [
+                                'id' => $item->id_ponpes,
+                                'name' => "{$item->n_ponpes} ({$item->daerah->n_daerah})"
+                            ];
+                        })->pluck('name', 'id')->toArray())
                         ->searchable()
+                        ->required(),
+                    Select::make('tahap')
+                        ->label('Tahap Tes')
+                        ->options(Tahap::class)
+                        ->default(Tahap::KEDIRI->value)
+                        ->disabled()
+                        ->dehydrated()
                         ->required(),
                 ]),
 
@@ -363,7 +398,7 @@ class PesertaKediri extends Model
             $builder->where('tahap', Tahap::KEDIRI->value);
         });
         static::addGlobalScope('del_status', function ($builder) {
-            $builder->where('del_status', NULL);
+            $builder->where('tb_tes_santri.del_status', NULL);
         });
     }
 }

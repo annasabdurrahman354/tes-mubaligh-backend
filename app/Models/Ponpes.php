@@ -7,6 +7,7 @@ use App\Enums\PenilaianKertosono;
 use App\Enums\StatusTesKediri;
 use App\Enums\StatusTesKertosono;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Forms;
@@ -25,6 +26,13 @@ class Ponpes extends Model
         'n_ponpes',
         'status',
     ];
+
+    protected function namaWithDaerah(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->n_ponpes." (".$this->daerah->n_daerah.")"
+        );
+    }
 
     public function daerah()
     {

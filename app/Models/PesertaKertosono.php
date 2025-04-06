@@ -6,18 +6,23 @@ use App\Enums\HasilSistem;
 use App\Enums\PenilaianKertosono;
 use App\Enums\StatusKelanjutan;
 use App\Enums\StatusKelanjutanKertosono;
+use App\Enums\StatusPeriode;
 use App\Enums\StatusTes;
 use App\Enums\StatusTesKertosono;
 use App\Enums\Tahap;
+use Carbon\Carbon;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Get;
+use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rules\Unique;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -42,8 +47,8 @@ class PesertaKertosono extends Model
     protected $casts = [
         'nomor_cocard' => 'integer',
         'tahap' => Tahap::class,
-        'status_tes' => StatusTes::class,
-        'status_kelanjutan' => StatusKelanjutan::class,
+        'status_tes' => StatusTesKertosono::class,
+        'status_kelanjutan' => StatusKelanjutanKertosono::class,
     ];
 
     protected function recordTitle(): Attribute
@@ -64,17 +69,17 @@ class PesertaKertosono extends Model
         );
     }
 
-    protected function asalDaerahNama(): Attribute
+    protected function asalDaerah(): Attribute
     {
         return Attribute::make(
             get: fn () => $this->siswa->daerahSambung->n_daerah
         );
     }
 
-    protected function asalPondokNama(): Attribute
+    protected function asalPondokWithDaerah(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->ponpes->n_ponpes." (".$this->ponpes->daerah->n_daerah.")"
+            get: fn () => $this->ponpes->namaWithDaerah
         );
     }
 
@@ -109,6 +114,124 @@ class PesertaKertosono extends Model
                 return array_values(array_unique($allKekurangan->toArray()));
             }
         );
+    }
+
+    public static function updateNomorCocardForTesPeriode(): void
+    {
+        // Function from previous request...
+        DB::transaction(function () {
+            $sortedPesertaIds = PesertaKertosono::query()
+                ->whereHas('periode', function ($query) {
+                    $query->where('status', StatusPeriode::PENGETESAN);
+                })
+                ->join('tb_personal_data', 'tb_tes_santri.nispn', '=', 'tb_personal_data.nispn')
+                ->join('tb_ponpes', 'tb_tes_santri.id_ponpes', '=', 'tb_ponpes.id_ponpes')
+                ->join('tb_daerah', 'tb_ponpes.id_daerah', '=', 'tb_daerah.id_daerah')
+                ->orderBy('tb_personal_data.jenis_kelamin')
+                ->orderBy('tb_daerah.n_daerah')
+                ->orderBy('tb_ponpes.n_ponpes')
+                ->orderBy('tb_personal_data.nama_lengkap')
+                ->select('tb_tes_santri.id_tes_santri')
+                ->pluck('id_tes_santri');
+
+            $nomorCocardCounter = 1;
+            foreach ($sortedPesertaIds as $id) {
+                PesertaKertosono::where('id_tes_santri', $id)
+                    ->update(['nomor_cocard' => $nomorCocardCounter]);
+                $nomorCocardCounter++;
+            }
+        });
+    }
+
+    // --- NEW FUNCTION ---
+
+    /**
+     * Creates PesertaKertosono records for the current testing period ('tes')
+     * based on PesertaKediri from the previous month who passed ('lulus')
+     * and were marked for continuation ('kertosono').
+     *
+     * @return int Number of participants successfully created. Returns -1 if current period not found.
+     */
+    public static function createKertosonoParticipantsFromPreviousMonth(): int
+    {
+        // 1. Find the current testing periode
+        $currentPeriode = Periode::where('status', StatusPeriode::PENGETESAN)->first();
+
+        if (!$currentPeriode) {
+            Log::warning("createKertosonoParticipantsFromPreviousMonth: No active 'tes' periode found.");
+            return -1; // Indicate error or specific status
+        }
+
+        $currentPeriodeId = $currentPeriode->id_periode; // e.g., "202501"
+
+        // 2. Calculate the previous month's periode ID
+        try {
+            $previousMonthDate = Carbon::createFromFormat('Ym', $currentPeriodeId)
+                ->startOfMonth() // Set to the first day for accurate month subtraction
+                ->subMonth(); // Subtract one month
+            $previousMonthPeriodeId = $previousMonthDate->format('Ym'); // e.g., "202412"
+        } catch (\Exception $e) {
+            Log::error("createKertosonoParticipantsFromPreviousMonth: Failed to parse current periode ID '{$currentPeriodeId}'. Error: " . $e->getMessage());
+            return -1; // Indicate error
+        }
+
+        Log::info("createKertosonoParticipantsFromPreviousMonth: Current Periode ID: {$currentPeriodeId}, Previous Periode ID: {$previousMonthPeriodeId}");
+
+        // 3. Find eligible PesertaKediri from the previous month
+        // Ensure you have StatusTes::LULUS and StatusKelanjutan::KERTOSONO defined in your Enums
+        // Or use the exact string values if not using Enums for these specific values
+        $eligiblePesertaKediri = PesertaKediri::where('id_periode', $previousMonthPeriodeId)
+            ->where('status_tes', StatusTes::LULUS) // Use Enum if available StatusTes::LULUS->value or 'lulus'
+            ->where('status_kelanjutan', StatusKelanjutan::KERTOSONO) // Use Enum StatusKelanjutan::KERTOSONO->value or 'kertosono'
+            ->get();
+
+        if ($eligiblePesertaKediri->isEmpty()) {
+            Log::info("createKertosonoParticipantsFromPreviousMonth: No eligible PesertaKediri found for periode {$previousMonthPeriodeId}.");
+            return 0; // No participants to create
+        }
+
+        Log::info("createKertosonoParticipantsFromPreviousMonth: Found {$eligiblePesertaKediri->count()} eligible PesertaKediri.");
+
+        $createdCount = 0;
+
+        // 4. Create new PesertaKertosono records within a transaction
+        DB::transaction(function () use ($eligiblePesertaKediri, $currentPeriodeId, &$createdCount) {
+            foreach ($eligiblePesertaKediri as $pesertaKediri) {
+                // 5. Check if a PesertaKertosono already exists for this nispn and current period
+                $existing = PesertaKertosono::where('nispn', $pesertaKediri->nispn)
+                    ->where('id_periode', $currentPeriodeId)
+                    ->exists();
+
+                if ($existing) {
+                    Log::info("createKertosonoParticipantsFromPreviousMonth: Skipping NISPN {$pesertaKediri->nispn} - already exists in periode {$currentPeriodeId}.");
+                    continue; // Skip if already exists
+                }
+
+                // 6. Prepare data and create the new PesertaKertosono record
+                try {
+                    PesertaKertosono::create([
+                        'id_ponpes'         => $pesertaKediri->id_ponpes,
+                        'id_periode'        => $currentPeriodeId, // Use the current period ID
+                        'nispn'             => $pesertaKediri->nispn,
+                        'tahap'             => Tahap::KERTOSONO, // Set Tahap Enum or 'kertosono'
+                        'kelompok'          => null, // Set kelompok to null
+                        'nomor_cocard'      => null, // Set nomor_cocard to null
+                        'status_tes'        => StatusTes::PRA_TES, // Set StatusTes Enum or 'pra-tes'
+                        'status_kelanjutan' => null, // Set status_kelanjutan to null
+                    ]);
+                    $createdCount++;
+                    Log::info("createKertosonoParticipantsFromPreviousMonth: Created PesertaKertosono for NISPN {$pesertaKediri->nispn} in periode {$currentPeriodeId}.");
+                } catch (\Exception $e) {
+                    Log::error("createKertosonoParticipantsFromPreviousMonth: Failed to create PesertaKertosono for NISPN {$pesertaKediri->nispn}. Error: " . $e->getMessage());
+                    // The transaction will automatically rollback on exception
+                    throw $e; // Re-throw to trigger rollback
+                }
+            }
+        }); // End transaction
+
+        Log::info("createKertosonoParticipantsFromPreviousMonth: Successfully created {$createdCount} PesertaKertosono records for periode {$currentPeriodeId}.");
+
+        return $createdCount; // Return the number of records created
     }
 
     public function siswa()
@@ -210,6 +333,16 @@ class PesertaKertosono extends Model
                 ->label('Jenis Kelamin')
                 ->badge()
                 ->sortable()
+                ->searchable(),
+
+            SelectColumn::make('id_ponpes')
+                ->label('Asal Pondok')
+                ->options(Ponpes::with('daerah')->get()->map(function ($item) {
+                    return [
+                        'id' => $item->id_ponpes,
+                        'name' => "{$item->n_ponpes} ({$item->daerah->n_daerah})"
+                    ];
+                })->pluck('name', 'id')->toArray())
                 ->searchable(),
 
             TextColumn::make('ponpes.n_ponpes')
@@ -321,8 +454,24 @@ class PesertaKertosono extends Model
                         ->required(),
                     Select::make('nispn')
                         ->label('Siswa')
-                        ->relationship('siswa', 'nama_lengkap')
                         ->searchable()
+                        ->getSearchResultsUsing(fn (string $search): array =>
+                        Siswa::where('nama_lengkap', 'like', "%{$search}%")
+                            ->limit(50)
+                            ->get() // Fetch data before mapping
+                            ->map(function ($item) {
+                                return [
+                                    'id' => $item->nispn,
+                                    'name' => "{$item->nama_lengkap} ({$item->nispn})"
+                                ];
+                            })
+                            ->pluck('name', 'id')
+                            ->toArray()
+                        )
+                        ->getOptionLabelUsing(function ($value) {
+                            $siswa = Siswa::where('nispn', $value)->first();
+                            return "{$siswa->nama_lengkap} ({$siswa->nispn})";
+                        })
                         ->required()
                         ->unique(ignoreRecord: true, modifyRuleUsing: function (Unique $rule, Get $get, $state) {
                             return $rule
@@ -338,10 +487,20 @@ class PesertaKertosono extends Model
                         ->numeric(),
                     Select::make('id_ponpes')
                         ->label('Asal Pondok')
-                        ->options(Ponpes::with('daerah')->get()->mapWithKeys(function ($item) {
-                            return [$item->id => "{$item->n_ponpes} ({$item->daerah->n_daerah})"];
-                        }))
+                        ->options(Ponpes::with('daerah')->get()->map(function ($item) {
+                            return [
+                                'id' => $item->id_ponpes,
+                                'name' => "{$item->n_ponpes} ({$item->daerah->n_daerah})"
+                            ];
+                        })->pluck('name', 'id')->toArray())
                         ->searchable()
+                        ->required(),
+                    Select::make('tahap')
+                        ->label('Tahap Tes')
+                        ->options(Tahap::class)
+                        ->default(Tahap::KERTOSONO->value)
+                        ->disabled()
+                        ->dehydrated()
                         ->required(),
                 ]),
 
@@ -388,7 +547,7 @@ class PesertaKertosono extends Model
             $builder->where('tahap', Tahap::KERTOSONO->value);
         });
         static::addGlobalScope('del_status', function ($builder) {
-            $builder->where('del_status', NULL);
+            $builder->where('tb_tes_santri.del_status', NULL);
         });
     }
 }

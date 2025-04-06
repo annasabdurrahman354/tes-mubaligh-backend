@@ -5,22 +5,22 @@ use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
 enum StatusPeriode : string implements HasLabel, HasColor {
-    case TES = 'pengetesan';
-    case PENDAFTARAN = 'registrasi';
+    case PENGETESAN = 'pengetesan';
+    case REGISTRASI = 'registrasi';
 
     public function getLabel(): ?string
     {
         return match ($this) {
-            self::TES => 'Pengetesan',
-            self::PENDAFTARAN => 'Registrasi',
+            self::PENGETESAN => 'Pengetesan',
+            self::REGISTRASI => 'Registrasi',
         };
     }
 
     public function getColor(): ?string
     {
         return match ($this) {
-            self::TES => 'primary',
-            self::PENDAFTARAN => 'secondary',
+            self::PENGETESAN => 'primary',
+            self::REGISTRASI => 'secondary',
         };
     }
 }

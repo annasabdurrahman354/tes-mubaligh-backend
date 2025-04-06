@@ -27,7 +27,6 @@ class PesertaKertosonoController extends Controller
             ->where('id_periode', $periode_pengetesan_id)
             ->where('status_tes', StatusTes::AKTIF->value)
             ->where('del_status', NULL)
-            ->orderByRaw('CONVERT(nomor_cocard, SIGNED) asc')
             ->tap(fn($query) => $query->withHasilSistem()) // Ensures scope is applied
             ->with(['siswa']) // Eager loading siswa for performance
             ->withCount('akademik'); // Count related akademik records
@@ -75,7 +74,8 @@ class PesertaKertosonoController extends Controller
             $pesertaQuery->take(30);
         }
 
-        $peserta = $pesertaQuery->orderByRaw('CAST(nomor_cocard AS UNSIGNED) ASC')->get()
+        $peserta = $pesertaQuery->orderByRaw('CONVERT(nomor_cocard, SIGNED) asc')
+            ->get()
             ->map(fn($peserta) => $this->transformPeserta($peserta, $request));
 
         return response()->json($peserta);
@@ -135,8 +135,8 @@ class PesertaKertosonoController extends Controller
             'nik' => $peserta->siswa->nik,
             'rfid' => $peserta->siswa->rfid,
             'kota_nama' => $peserta->siswa->kota->nama ?? null,
-            'asal_pondok_nama' => $peserta->asalPondokNama ?? null,
-            'asal_daerah_nama' => ucwords($peserta->asalDaerahNama) ?? null,
+            'asal_pondok_nama' => $peserta->asalPondokWithDaerah ?? null,
+            'asal_daerah_nama' => ucwords($peserta->asalDaerah) ?? null,
             'pendidikan' => $pendidikan,
             'status_mondok' => $peserta->siswa->status_mondok,
             'keahlian' => $peserta->siswa->keahlian ?? null,
