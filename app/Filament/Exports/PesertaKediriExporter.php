@@ -2,15 +2,15 @@
 
 namespace App\Filament\Exports;
 
-use App\Models\PesertaKertosono;
+use App\Models\PesertaKediri;
 use Carbon\Carbon;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
 
-class HasilTesKertosonoExporter extends Exporter
+class PesertaKediriExporter extends Exporter
 {
-    protected static ?string $model = PesertaKertosono::class;
+    protected static ?string $model = PesertaKediri::class;
 
     public static function getColumns(): array
     {
@@ -18,16 +18,28 @@ class HasilTesKertosonoExporter extends Exporter
             ExportColumn::make('id_periode')
                 ->label('Periode'),
 
+            ExportColumn::make('nispn')
+                ->label('NISPN'),
+
+            ExportColumn::make('siswa.nik')
+                ->label('NIK'),
+
+            ExportColumn::make('kelompok')
+                ->label('Kelompok'),
+
             ExportColumn::make('nomor_cocard')
                 ->label('Cocard'),
 
             ExportColumn::make('siswa.nama_lengkap')
-                ->label('Nama'),
+                ->label('Nama Lengkap'),
+
+            ExportColumn::make('siswa.nama_panggilan')
+                ->label('Nama Panggilan'),
 
             ExportColumn::make('siswa.jenis_kelamin')
                 ->label('Jenis Kelamin')
-                ->state(function (PesertaKertosono $record) {
-                    return $record->siswa->jenis_kelamin->getLabel();
+                ->state(function (PesertaKediri $record) {
+                    return $record->siswa->jenis_kelamin->value;
                 }),
 
             ExportColumn::make('ponpes.n_ponpes')
@@ -44,25 +56,37 @@ class HasilTesKertosonoExporter extends Exporter
 
             ExportColumn::make('umur')
                 ->label('Umur')
-                ->state(function (PesertaKertosono $record) {
+                ->state(function (PesertaKediri $record) {
                     $tanggalLahir = $record->siswa->tanggal_lahir;
                     return Carbon::parse($tanggalLahir)->age;
                 }),
 
+            ExportColumn::make('siswa.hp')
+                ->label('HP'),
+
             ExportColumn::make('siswa.alamat')
                 ->label('Alamat'),
 
-            ExportColumn::make('siswa.provinsi.nama')
+            ExportColumn::make('siswa.provinsi')
                 ->label('Provinsi'),
 
-            ExportColumn::make('siswa.kota.nama')
+            ExportColumn::make('siswa.kota_kab')
                 ->label('Kota'),
 
-            ExportColumn::make('siswa.kecamatan.nama')
+            ExportColumn::make('siswa.kecamatan')
                 ->label('Kecamatan'),
 
-            ExportColumn::make('siswa.kelurahan.nama')
+            ExportColumn::make('siswa.desa_kel')
                 ->label('Kelurahan'),
+
+            ExportColumn::make('siswa.rt')
+                ->label('RT'),
+
+            ExportColumn::make('siswa.rw')
+                ->label('RW'),
+
+            ExportColumn::make('siswa.kode_pos')
+                ->label('Kode Pos'),
 
             ExportColumn::make('siswa.daerahSambung.n_daerah')
                 ->label('Asal Daerah'),
@@ -75,7 +99,7 @@ class HasilTesKertosonoExporter extends Exporter
 
             ExportColumn::make('siswa.status_mondok')
                 ->label('Status Mondok')
-                ->state(function (PesertaKertosono $record) {
+                ->state(function (PesertaKediri $record) {
                     return $record->siswa->status_mondok?->getLabel();
                 }),
 
@@ -112,21 +136,15 @@ class HasilTesKertosonoExporter extends Exporter
             ExportColumn::make('siswa.nama_ibu')
                 ->label('Nama Ibu'),
 
-            ExportColumn::make('rekomendasi_guru')
-                ->label('Direkomendasikan')
-                ->state(function (PesertaKertosono $record) {
-                    return $record->rekomendasi_guru;
-                }),
-
             ExportColumn::make('status_tes')
-                ->label('Hasil Tes')
-                ->state(function (PesertaKertosono $record) {
+                ->label('Status Tes')
+                ->state(function (PesertaKediri $record) {
                     return $record->status_tes?->getLabel();
                 }),
 
             ExportColumn::make('status_kelanjutan')
                 ->label('Status Kelajutan')
-                ->state(function (PesertaKertosono $record) {
+                ->state(function (PesertaKediri $record) {
                     return $record->status_kelanjutan?->getLabel();
                 }),
         ];
@@ -137,10 +155,10 @@ class HasilTesKertosonoExporter extends Exporter
         $periode_pengetesan_id = getPeriodeTes();
         $periode = getYearAndMonthName($periode_pengetesan_id);
 
-        $body = 'Data hasil tes Kertosono periode '.$periode['monthName'].' '.$periode['year'].' sejumlah ' . number_format($export->successful_rows) . ' ' . str('row')->plural($export->successful_rows) . ' baris berhasil diekspor.';
+        $body = 'Data hasil tes Kediri periode '.$periode['monthName'].' '.$periode['year'].' sejumlah ' . number_format($export->successful_rows) . ' ' . str('baris')->plural($export->successful_rows) . ' berhasil diekspor.';
 
         if ($failedRowsCount = $export->getFailedRowsCount()) {
-            $body .= ' ' . number_format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' gagal diekspor.';
+            $body .= ' ' . number_format($failedRowsCount) . ' ' . str('baris')->plural($failedRowsCount) . ' gagal diekspor.';
         }
 
         return $body;

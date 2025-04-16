@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\HasilSistem;
 use App\Enums\StatusKelanjutanKediri;
+use App\Enums\StatusPeriode;
 use App\Enums\StatusTesKediri;
 use App\Enums\Tahap;
 use Filament\Forms\Components\Section;
@@ -17,6 +18,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rules\Unique;
 
 class PesertaKediri extends Model
@@ -82,6 +85,110 @@ class PesertaKediri extends Model
         return Attribute::make(
             get: fn () => $this->ponpes->namaWithDaerah
         );
+    }
+
+    public static function updateNomorCocardAndKelompok(): void
+    {
+        DB::transaction(function () {
+            $kelompokList = range('A', 'T');
+            $numKelompok = count($kelompokList); // Should be 20
+            $periodeTesId = getPeriodeTes(); // Get the specific periode ID
+
+            if (!$periodeTesId) {
+                throw new \Exception("Periode Tes tidak ditemukan.");
+            }
+
+            // 1. Fetch participants for the specific periode, eager-loading required siswa data
+            $pesertaData = PesertaKediri::where('id_periode', $periodeTesId)
+                ->where('status_tes', StatusTesKediri::PRA_TES)
+                ->with(['siswa' => function ($query) {
+                    $query->select('nispn', 'jenis_kelamin', 'nama_lengkap');
+                }])
+                ->get();
+
+            // 2. Group by gender
+            $groupedByGender = $pesertaData->groupBy(function ($peserta) {
+                return $peserta->siswa->jenis_kelamin ?? 'unknown';
+            });
+
+            $updates = []; // To store all update data
+
+            // Process each gender group separately
+            foreach ($groupedByGender as $gender => $pesertaGroup) {
+
+                // 3. Sort participants within the gender group by name
+                $sortedPeserta = $pesertaGroup->sortBy(function ($peserta) {
+                    return strtolower(trim($peserta->siswa->nama_lengkap ?? ''));
+                })->values(); // ->values() is important to ensure keys are 0, 1, 2...
+
+                $totalPesertaInGroup = $sortedPeserta->count();
+                if ($totalPesertaInGroup === 0) {
+                    continue; // Skip empty groups
+                }
+
+                // 5. Calculate base size and remainder for distribution
+                $baseSize = floor($totalPesertaInGroup / $numKelompok);
+                $remainder = $totalPesertaInGroup % $numKelompok;
+
+                $currentPesertaIndex = 0; // Pointer to the current participant in $sortedPeserta
+
+                // 4, 6, 7, 8: Loop through each target Kelompok (A-T) and assign participants
+                for ($groupIndex = 0; $groupIndex < $numKelompok; $groupIndex++) {
+                    // Determine the target number of participants for *this* specific kelompok
+                    $targetSizeForThisGroup = $baseSize + ($groupIndex < $remainder ? 1 : 0);
+
+                    // Get the letter for the current kelompok
+                    $assignedKelompok = $kelompokList[$groupIndex];
+
+                    // Assign participants to this kelompok
+                    for ($nomorInKelompok = 1; $nomorInKelompok <= $targetSizeForThisGroup; $nomorInKelompok++) {
+                        // Safety check: ensure we don't try to access beyond the sorted list
+                        if ($currentPesertaIndex >= $totalPesertaInGroup) {
+                            // This should not happen if calculations are correct, but acts as a safeguard
+                            Log::warning("Peserta index out of bounds during assignment.", [
+                                'gender' => $gender,
+                                'groupIndex' => $groupIndex,
+                                'currentIndex' => $currentPesertaIndex,
+                                'total' => $totalPesertaInGroup
+                            ]);
+                            break; // Exit inner loop for this group
+                        }
+
+                        // Get the participant to assign
+                        $peserta = $sortedPeserta->get($currentPesertaIndex);
+
+                        // Prepare the update data
+                        if ($peserta) { // Ensure participant exists
+                            $updates[$peserta->id_tes_santri] = [
+                                'kelompok' => $assignedKelompok,
+                                'nomor_cocard' => $nomorInKelompok,
+                            ];
+                        }
+
+                        // Move to the next participant in the sorted list
+                        $currentPesertaIndex++;
+                    } // End loop for assigning participants within one kelompok
+
+                    // Safety check: break outer loop if all participants assigned
+                    if ($currentPesertaIndex >= $totalPesertaInGroup) {
+                        break;
+                    }
+
+                } // End loop through kelompokList (A-T)
+
+            } // End loop through gender groups
+
+            // Perform the database updates
+            if (!empty($updates)) {
+                foreach ($updates as $id_tes_santri => $data) {
+                    PesertaKediri::where('id_tes_santri', $id_tes_santri)
+                        ->update([
+                            'kelompok' => $data['kelompok'],
+                            'nomor_cocard' => $data['nomor_cocard'],
+                        ]);
+                }
+            }
+        });
     }
 
     public function siswa()
@@ -186,12 +293,20 @@ class PesertaKediri extends Model
 
             SelectColumn::make('id_ponpes')
                 ->label('Asal Pondok')
-                ->options(Ponpes::with('daerah')->get()->map(function ($item) {
-                    return [
-                        'id' => $item->id_ponpes,
-                        'name' => "{$item->n_ponpes} ({$item->daerah->n_daerah})"
-                    ];
-                })->pluck('name', 'id')->toArray())
+                ->options(
+                    Ponpes::with('daerah')
+                        ->join('tb_daerah', 'tb_ponpes.id_daerah', '=', 'tb_daerah.id_daerah')
+                        ->orderByRaw('LOWER(tb_daerah.n_daerah), LOWER(tb_ponpes.n_ponpes)')
+                        ->get()
+                        ->map(function ($item) {
+                            return [
+                                'id' => $item->id_ponpes,
+                                'name' => "{$item->n_ponpes} ({$item->daerah->n_daerah})"
+                            ];
+                        })
+                        ->pluck('name', 'id')
+                        ->toArray()
+                )
                 ->searchable(),
 
             TextColumn::make('ponpes.n_ponpes')

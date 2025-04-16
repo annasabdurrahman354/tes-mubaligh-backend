@@ -35,6 +35,7 @@ class Siswa extends Model implements HasMedia
         'nik', 'nispn', 'nis', 'nisn', 'kk', 'rfid', 'nama_lengkap', 'nama_panggilan',
         'tempat_lahir', 'tanggal_lahir', 'jenis_kelamin', 'alamat', 'rt', 'rw',
         'provinsi_id', 'kota_kab_id', 'kecamatan_id', 'desa_kel_id',
+        'provinsi', 'kota_kab', 'kecamatan', 'desa_kel',
         'kode_pos', 'hp', 'email', 'pendidikan', 'jurusan',
         'id_daerah_sambung', 'desa_sambung', 'kelompok_sambung',
         'anak_ke', 'dari_saudara', 'status_nikah', 'riwayat_sakit', 'alergi',
@@ -65,22 +66,22 @@ class Siswa extends Model implements HasMedia
         );
     }
 
-    public function provinsi(): BelongsTo
+    public function province(): BelongsTo
     {
         return $this->belongsTo(Provinsi::class, 'provinsi_id', 'id_provinsi');
     }
 
-    public function kota(): BelongsTo
+    public function regency(): BelongsTo
     {
         return $this->belongsTo(Kota::class, 'kota_kab_id', 'id_kota_kab');
     }
 
-    public function kecamatan(): BelongsTo
+    public function district(): BelongsTo
     {
         return $this->belongsTo(Kecamatan::class, 'kecamatan_id', 'id_kecamatan');
     }
 
-    public function kelurahan(): BelongsTo
+    public function village(): BelongsTo
     {
         return $this->belongsTo(Kelurahan::class, 'desa_kel_id', 'id_desa_kel');
     }
@@ -93,6 +94,11 @@ class Siswa extends Model implements HasMedia
     public function daerahKiriman(): BelongsTo
     {
         return $this->belongsTo(Daerah::class, 'id_daerah_kiriman', 'id_daerah');
+    }
+
+    public function statusPonpes()
+    {
+        return $this->hasMany(SiswaPonpes::class, 'nispn', 'nispn');
     }
 
     public function pesertaKediri()
@@ -211,13 +217,13 @@ class Siswa extends Model implements HasMedia
                         ]),
                     Select::make('provinsi_id')
                         ->label('Provinsi')
-                        ->relationship('provinsi', 'nama')
+                        ->relationship('province', 'nama')
                         ->searchable()
                         ->live(),
                     Select::make('kota_kab_id')
                         ->label('Kota')
                         ->relationship(
-                            name: 'kota',
+                            name: 'regency',
                             titleAttribute: 'nama',
                             modifyQueryUsing: fn (Builder $query, Get $get) =>
                             $query->where('provinsi_id', $get('provinsi_id')),
@@ -228,7 +234,7 @@ class Siswa extends Model implements HasMedia
                     Select::make('kecamatan_id')
                         ->label('Kecamatan')
                         ->relationship(
-                            name: 'kecamatan',
+                            name: 'district',
                             titleAttribute: 'nama',
                             modifyQueryUsing: fn (Builder $query, Get $get) =>
                             $query->where('kota_kab_id', $get('kota_kab_id')),
@@ -239,7 +245,7 @@ class Siswa extends Model implements HasMedia
                     Select::make('desa_kel_id')
                         ->label('Kelurahan')
                         ->relationship(
-                            name: 'kelurahan',
+                            name: 'village',
                             titleAttribute: 'nama',
                             modifyQueryUsing: fn (Builder $query, Get $get) =>
                             $query->where('kecamatan_id', $get('kecamatan_id')),
@@ -312,8 +318,8 @@ class Siswa extends Model implements HasMedia
                             'SMP' => 'SMP',
                             'SMA' => 'SMA',
                             'SMK' => 'SMK',
-                            'Paket C' => 'Paket C',
                             'D3' => 'D3',
+                            'D4' => 'D4',
                             'S1' => 'S1',
                             'S2' => 'S2',
                             'S3' => 'S3'
@@ -360,6 +366,7 @@ class Siswa extends Model implements HasMedia
                             'B' => 'B',
                             'AB' => 'AB',
                             'O' => 'O',
+                            '-' => 'Tidak Diketahui',
                         ]),
                 ]),
 
@@ -465,16 +472,6 @@ class Siswa extends Model implements HasMedia
                 ->label('Jenis Kelamin')
                 ->badge()
                 ->sortable(),
-            Tables\Columns\TextColumn::make('nis')
-                ->label('NIS')
-                ->searchable()
-                ->sortable()
-                ->toggleable(),
-            Tables\Columns\TextColumn::make('nisn')
-                ->label('NIS')
-                ->searchable()
-                ->sortable()
-                ->toggleable(),
             Tables\Columns\TextColumn::make('kk')
                 ->label('Nomor KK')
                 ->searchable()
@@ -513,21 +510,27 @@ class Siswa extends Model implements HasMedia
             Tables\Columns\TextColumn::make('rw')
                 ->label('RW')
                 ->toggleable(),
-            Tables\Columns\TextColumn::make('provinsi.nama')
+            Tables\Columns\TextColumn::make('province.nama')
                 ->label('Provinsi')
                 ->searchable()
                 ->toggleable(),
-            Tables\Columns\TextColumn::make('kota.nama')
+            Tables\Columns\TextColumn::make('provinsi')
+                ->label('Provinsi Nama')
+                ->searchable()
+                ->toggleable(),
+            Tables\Columns\TextColumn::make('regency.nama')
                 ->label('Kota')
                 ->searchable()
                 ->toggleable(),
-            Tables\Columns\TextColumn::make('kecamatan.nama')
-                ->label('Kecamatan')
+            Tables\Columns\TextColumn::make('kota_kab')
+                ->label('Kota Nama')
                 ->searchable()
                 ->toggleable(),
-            Tables\Columns\TextColumn::make('kelurahan.nama')
+            Tables\Columns\TextColumn::make('district.nama')
+                ->label('Kecamatan')
+                ->toggleable(),
+            Tables\Columns\TextColumn::make('village.nama')
                 ->label('Kelurahan')
-                ->searchable()
                 ->toggleable(),
             Tables\Columns\TextColumn::make('kode_pos')
                 ->label('Kode Pos')

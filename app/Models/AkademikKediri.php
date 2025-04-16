@@ -33,6 +33,7 @@ class AkademikKediri extends Model
         'nilai_penjelasan',
         'nilai_pemahaman',
         'catatan',
+        'durasi_penilaian',
     ];
 
     protected function recordTitle(): Attribute
@@ -54,6 +55,7 @@ class AkademikKediri extends Model
             'nilai_penjelasan' => $this->nilai_penjelasan,
             'nilai_pemahaman' => $this->nilai_pemahaman,
             'catatan' => $this->catatan,
+            'durasi_penilaian' => $this->durasi_penilaian,
             'created_at' => Carbon::parse($this->created_at)->translatedFormat('d F Y'),
         ];
     }
@@ -110,6 +112,8 @@ class AkademikKediri extends Model
                 Tables\Columns\TextColumn::make('catatan')
                     ->label('Catatan')
                     ->limit(50),
+                Tables\Columns\TextColumn::make('durasi_penilaian')
+                    ->label('Lama Penilaian'),
                 TextColumn::make('created_at')
                     ->label('Created At')
                     ->dateTime()
@@ -211,6 +215,10 @@ class AkademikKediri extends Model
                     Forms\Components\Textarea::make('catatan')
                         ->label('Catatan')
                         ->nullable(),
+                    Forms\Components\TextInput::make('durasi_penilaian')
+                        ->label('Lama Penilaian')
+                        ->numeric()
+                        ->integer(),
                 ])
                 ->visible(fn(Get $get, string $operation) => ($get('bulan') && $get('tahun') && $get('jenis_kelamin')) || $operation != 'create'),
             ];

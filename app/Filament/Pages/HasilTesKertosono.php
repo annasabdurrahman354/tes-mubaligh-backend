@@ -6,19 +6,17 @@ use App\Enums\HasilSistem;
 use App\Enums\JenisKelamin;
 use App\Enums\PenilaianKertosono;
 use App\Enums\StatusKelanjutanKertosono;
-use App\Enums\StatusTesKediri;
 use App\Enums\StatusTesKertosono;
-use App\Filament\Exports\HasilTesKertosonoExporter;
 use App\Models\PesertaKertosono;
 use Awcodes\TableRepeater\Components\TableRepeater;
 use Awcodes\TableRepeater\Header;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Pages\Page;
 use Filament\Tables\Actions\Action;
-use Filament\Tables\Actions\ExportAction;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
@@ -32,6 +30,7 @@ use Illuminate\Support\Facades\DB;
 
 class HasilTesKertosono extends Page implements HasTable
 {
+    use HasPageShield;
     use InteractsWithTable;
 
     protected static ?string $slug = 'hasil-tes-kertosono';
@@ -159,11 +158,6 @@ class HasilTesKertosono extends Page implements HasTable
                 Action::make('ubah_status_tes')
                     ->label('Ubah Kelulusan')
                     ->fillForm(function (PesertaKertosono $record): array {
-                        // Apply the scope to include generated values
-                        $record = PesertaKertosono::query()
-                            ->withHasilSistem()
-                            ->find($record->id); // Ensure you're fetching the record with the scope applied
-
                         return [
                             'nama' => $record->siswa->nama_lengkap . ' (' . $record->kelompok . $record->nomor_cocard . ')',
                             'akademik' => $record->akademik,
@@ -365,13 +359,6 @@ class HasilTesKertosono extends Page implements HasTable
                     ->color('danger')
                     ->icon('heroicon-o-exclamation-circle')
                     ->requiresConfirmation(),
-                ExportAction::make()
-                    ->label('Ekspor')
-                    ->exporter(HasilTesKertosonoExporter::class)
-                    ->modifyQueryUsing(fn (Builder $query) => $query->with('siswa')
-                        ->withHasilSistem()
-                        ->where('id_periode', $periode_pengetesan_id)
-                    )
             ])
             ->bulkActions([
 

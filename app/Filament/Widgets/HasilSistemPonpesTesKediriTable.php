@@ -3,12 +3,14 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Ponpes;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 
 class HasilSistemPonpesTesKediriTable extends BaseWidget
 {
+    use HasWidgetShield;
     protected static ?int $sort = 98;
     protected static ?string $pollingInterval = null;
     protected static bool $isLazy = false;

@@ -2,15 +2,19 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Imports\UpdateNamaKotaImporter;
 use App\Filament\Resources\KotaResource\Pages\CreateKota;
 use App\Filament\Resources\KotaResource\Pages\EditKota;
 use App\Filament\Resources\KotaResource\Pages\ListKotas;
 use App\Models\Kota;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\QueryException;
 
 class KotaResource extends Resource
 {
@@ -43,6 +47,32 @@ class KotaResource extends Resource
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make()
                     ->requiresConfirmation(),
+            ])
+            ->headerActions([
+                Tables\Actions\ImportAction::make()
+                    ->label('Update Kota')
+                    ->importer(UpdateNamaKotaImporter::class)
+                    ->color('danger')
+                    ->icon('heroicon-o-exclamation-circle')
+                    ->requiresConfirmation(),
+                Action::make('deleteAllKota')
+                    ->label('Delete All Kota')
+                    ->icon('heroicon-o-building-office-2') // Different icon example
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading('Delete All Kota Data?')
+                    ->modalDescription('WARNING: This will permanently delete ALL records from the Kota table. This action cannot be undone. Are you sure?')
+                    ->modalSubmitActionLabel('Yes, delete all Kota')
+                    ->action(function () {
+                        try {
+                            Kota::query()->delete();
+                            Notification::make()->title('Kota Deleted')->body('All Kota records have been deleted.')->success()->send();
+                        } catch (QueryException $e) {
+                            Notification::make()->title('Error Deleting Kota')->body('Could not delete records. Check constraints or logs. Error: ' . $e->getMessage())->danger()->send();
+                        } catch (\Exception $e) {
+                            Notification::make()->title('Unexpected Error')->body('Could not delete Kota records. Check logs.')->danger()->send();
+                        }
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

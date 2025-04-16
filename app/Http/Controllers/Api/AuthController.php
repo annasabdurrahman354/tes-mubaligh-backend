@@ -111,22 +111,4 @@ class AuthController extends Controller
             'foto' => $user->getFilamentAvatarUrl(),  // Add the avatar URL here
         ];
     }
-
-    public function updatePassword(Request $request)
-    {
-        $request->validate([
-            'password' => ['required', 'string'],
-        ], [
-            'password.required' => 'Password baru wajib diisi.',
-            'password.string' => 'Password baru harus berupa teks.',
-        ]);
-
-        $user = $request->user();
-
-        // Update the password
-        $user->password = Hash::make($request->password);
-        $user->save();
-
-        return response()->json(['message' => 'Password berhasil diperbarui.'], 200);
-    }
 }

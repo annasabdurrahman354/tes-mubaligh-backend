@@ -194,8 +194,8 @@ class PesertaKediriController extends Controller
             'id' => $peserta->id_tes_santri,
             'id_periode' => $peserta->id_periode,
             'nispn' => $peserta->nispn,
-            'nama_lengkap' => $peserta->siswa?->nama_lengkap,
-            'nama_panggilan' => $peserta->siswa?->nama_panggilan,
+            'nama_lengkap' => excelProper($peserta->siswa?->nama_lengkap),
+            'nama_panggilan' => excelProper($peserta->siswa?->nama_panggilan),
             'jenis_kelamin' => $peserta->siswa?->jenis_kelamin,
             'kelompok' => $peserta->kelompok,
             'nomor_cocard' => $peserta->nomor_cocard,
@@ -204,13 +204,13 @@ class PesertaKediriController extends Controller
             'rfid' => $peserta->siswa?->rfid,
             'kota_nama' => $peserta->siswa?->kota?->nama, // Chained null-safe access
             'asal_pondok_nama' => $peserta->asalPondokWithDaerah, // Assuming Accessor exists
-            'asal_daerah_nama' => ucwords(strtolower($peserta->asalDaerah ?? '')), // Assuming Accessor exists
+            'asal_daerah_nama' => excelProper($peserta->asalDaerah ?? ''), // Assuming Accessor exists
             'pendidikan' => $pendidikan,
             'status_mondok' => $peserta->siswa?->status_mondok,
             'keahlian' => $peserta->siswa?->keahlian,
             'hobi' => $peserta->siswa?->hobi,
             'umur' => $umur,
-            'nama_ayah' => $peserta->siswa?->nama_ayah ? formatNamaProper($peserta->siswa->nama_ayah) : null,
+            'nama_ayah' => $peserta->siswa?->nama_ayah ? excelProper($peserta->siswa->nama_ayah) : null,
             'riwayat_tes' => $peserta->riwayat_tes, // Assuming Accessor/Attribute exists
             // Use the eager-loaded count
             'jumlah_penyimakan' => $peserta->akademik_count,

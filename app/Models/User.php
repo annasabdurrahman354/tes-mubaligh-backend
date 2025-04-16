@@ -132,6 +132,28 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasName, 
             ->count();
     }
 
+    public function getTotalDurasiPenilaianKediriAttribute()
+    {
+        $periodePengetesanId = getPeriodeTes();
+
+        return $this->akademikKediri()
+            ->whereHas('peserta', function ($query) use ($periodePengetesanId) {
+                $query->where('id_periode', $periodePengetesanId);
+            })
+            ->sum('durasi_penilaian') ?? 0;
+    }
+
+    public function getRataRataDurasiPenilaianKediriAttribute()
+    {
+        $periodePengetesanId = getPeriodeTes();
+
+        return $this->akademikKediri()
+            ->whereHas('peserta', function ($query) use ($periodePengetesanId) {
+                $query->where('id_periode', $periodePengetesanId);
+            })
+            ->average('durasi_penilaian') ?? 0;
+    }
+
     public function getJumlahPenyimakanPutraKertosonoAttribute()
     {
         $periodePengetesanId = getPeriodeTes();

@@ -4,15 +4,20 @@ namespace App\Filament\Resources;
 
 use App\Enums\JenisKelamin;
 use App\Enums\KelompokKediri;
+use App\Filament\Exports\PesertaKediriExporter;
+use App\Filament\Imports\UpdateStatusTesPesertaKediriImporter;
 use App\Filament\Resources\PesertaKediriResource\Pages\CreatePesertaKediri;
 use App\Filament\Resources\PesertaKediriResource\Pages\EditPesertaKediri;
 use App\Filament\Resources\PesertaKediriResource\Pages\ListPesertaKediris;
 use App\Filament\Resources\PesertaKediriResource\Pages\ViewPesertaKediri;
+use App\Models\Periode;
 use App\Models\PesertaKediri;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\ExportAction;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -70,13 +75,36 @@ class PesertaKediriResource extends Resource
                     }),
                 SelectFilter::make('kelompok')
                     ->label('Kelompok')
-                    ->options(KelompokKediri::class)
+                    ->options(KelompokKediri::class),
+                SelectFilter::make('id_periode')
+                    ->label('Periode Tes')
+                    ->options(Periode::orderBy('id_periode', 'desc')->get()->pluck('id_periode', 'id_periode'))
+                    ->searchable()
             ], layout: FiltersLayout::AboveContent)
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make()
                     ->requiresConfirmation(),
+            ])
+            ->headerActions([
+                Action::make('assign_cocard')
+                    ->label('Assign Cocard')
+                    ->action(function () {
+                        PesertaKediri::updateNomorCocardAndKelompok();
+                    })
+                    ->color('danger')
+                    ->icon('heroicon-o-exclamation-circle')
+                    ->requiresConfirmation(),
+                Tables\Actions\ImportAction::make()
+                    ->label('Update Status Tes')
+                    ->importer(UpdateStatusTesPesertaKediriImporter::class)
+                    ->color('danger')
+                    ->icon('heroicon-o-exclamation-circle')
+                    ->requiresConfirmation(),
+                ExportAction::make()
+                    ->label('Ekspor')
+                    ->exporter(PesertaKediriExporter::class),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

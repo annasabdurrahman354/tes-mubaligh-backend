@@ -26,7 +26,7 @@ class ListPesertaKediris extends ListRecords
         $tabs = [
             'Pengetesan ('.$periodePengetesan.')' => Tab::make()->query(fn ($query) => $query->where('id_periode', $periodePengetesan)),
             'Pendaftaran ('.$periodePendaftaran.')' => Tab::make()->query(fn ($query) => $query->where('id_periode', $periodePendaftaran)),
-            'Periode Lain' => Tab::make()->query(fn ($query) => $query->whereNotIn('id_periode', [$periodePendaftaran, $periodePengetesan])),
+            'Semua Periode' => Tab::make(),
         ];
         return $tabs;
     }

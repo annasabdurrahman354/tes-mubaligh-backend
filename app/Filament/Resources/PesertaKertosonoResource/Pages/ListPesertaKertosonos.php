@@ -25,7 +25,7 @@ class ListPesertaKertosonos extends ListRecords
 
         $tabs = [
             'Pengetesan ('.$periodePengetesan.')' => Tab::make()->query(fn ($query) => $query->where('id_periode', $periodePengetesan)),
-            'Periode Lain' => Tab::make()->query(fn ($query) => $query->whereNotIn('id_periode', [$periodePengetesan])),
+            'Semua Periode' => Tab::make(),
         ];
         return $tabs;
     }

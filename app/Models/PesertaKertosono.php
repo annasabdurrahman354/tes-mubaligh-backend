@@ -116,25 +116,36 @@ class PesertaKertosono extends Model
         );
     }
 
-    public static function updateNomorCocardForTesPeriode(): void
+    /**
+     * Updates the 'nomor_cocard' for participants in the 'PENGETESAN' period.
+     * The numbering is based on sorting participants case-insensitively by:
+     * 1. Gender (case-sensitive, assuming standard codes like 'L'/'P')
+     * 2. Region name (case-insensitive)
+     * 3. Ponpes name (case-insensitive)
+     * 4. Full name (case-insensitive)
+     *
+     * @return void
+     */
+    public static function updateNomorCocard(): void
     {
-        // Function from previous request...
-        DB::transaction(function () {
+        $periodePengetesan = getPeriodeTes();
+        DB::transaction(function () use ($periodePengetesan) {
             $sortedPesertaIds = PesertaKertosono::query()
-                ->whereHas('periode', function ($query) {
-                    $query->where('status', StatusPeriode::PENGETESAN);
-                })
+                ->where('status_tes', StatusTesKertosono::AKTIF->value)
+                ->where('id_periode', $periodePengetesan)
                 ->join('tb_personal_data', 'tb_tes_santri.nispn', '=', 'tb_personal_data.nispn')
                 ->join('tb_ponpes', 'tb_tes_santri.id_ponpes', '=', 'tb_ponpes.id_ponpes')
                 ->join('tb_daerah', 'tb_ponpes.id_daerah', '=', 'tb_daerah.id_daerah')
                 ->orderBy('tb_personal_data.jenis_kelamin')
-                ->orderBy('tb_daerah.n_daerah')
-                ->orderBy('tb_ponpes.n_ponpes')
-                ->orderBy('tb_personal_data.nama_lengkap')
+                // Use orderByRaw with LOWER() for case-insensitive sorting on text fields
+                ->orderByRaw('LOWER(tb_daerah.n_daerah)')
+                ->orderByRaw('LOWER(tb_ponpes.n_ponpes)')
+                ->orderByRaw('LOWER(LTRIM(tb_personal_data.nama_lengkap))')
                 ->select('tb_tes_santri.id_tes_santri')
-                ->pluck('id_tes_santri');
+                ->pluck('id_tes_santri'); // Pluck only the IDs after sorting
 
             $nomorCocardCounter = 1;
+            // Loop through the correctly sorted IDs and update the nomor_cocard
             foreach ($sortedPesertaIds as $id) {
                 PesertaKertosono::where('id_tes_santri', $id)
                     ->update(['nomor_cocard' => $nomorCocardCounter]);
@@ -142,8 +153,6 @@ class PesertaKertosono extends Model
             }
         });
     }
-
-    // --- NEW FUNCTION ---
 
     /**
      * Creates PesertaKertosono records for the current testing period ('tes')
@@ -155,38 +164,36 @@ class PesertaKertosono extends Model
     public static function createKertosonoParticipantsFromPreviousMonth(): int
     {
         // 1. Find the current testing periode
-        $currentPeriode = Periode::where('status', StatusPeriode::PENGETESAN)->first();
+        $currentPeriode = getPeriodeTes();
 
         if (!$currentPeriode) {
             Log::warning("createKertosonoParticipantsFromPreviousMonth: No active 'tes' periode found.");
             return -1; // Indicate error or specific status
         }
 
-        $currentPeriodeId = $currentPeriode->id_periode; // e.g., "202501"
-
         // 2. Calculate the previous month's periode ID
         try {
-            $previousMonthDate = Carbon::createFromFormat('Ym', $currentPeriodeId)
+            $previousMonthDate = Carbon::createFromFormat('Ym', $currentPeriode)
                 ->startOfMonth() // Set to the first day for accurate month subtraction
                 ->subMonth(); // Subtract one month
-            $previousMonthPeriodeId = $previousMonthDate->format('Ym'); // e.g., "202412"
+            $previousMonthPeriode = $previousMonthDate->format('Ym'); // e.g., "202412"
         } catch (\Exception $e) {
-            Log::error("createKertosonoParticipantsFromPreviousMonth: Failed to parse current periode ID '{$currentPeriodeId}'. Error: " . $e->getMessage());
+            Log::error("createKertosonoParticipantsFromPreviousMonth: Failed to parse current periode ID '{$currentPeriode}'. Error: " . $e->getMessage());
             return -1; // Indicate error
         }
 
-        Log::info("createKertosonoParticipantsFromPreviousMonth: Current Periode ID: {$currentPeriodeId}, Previous Periode ID: {$previousMonthPeriodeId}");
+        Log::info("createKertosonoParticipantsFromPreviousMonth: Current Periode ID: {$currentPeriode}, Previous Periode ID: {$previousMonthPeriode}");
 
         // 3. Find eligible PesertaKediri from the previous month
         // Ensure you have StatusTes::LULUS and StatusKelanjutan::KERTOSONO defined in your Enums
         // Or use the exact string values if not using Enums for these specific values
-        $eligiblePesertaKediri = PesertaKediri::where('id_periode', $previousMonthPeriodeId)
-            ->where('status_tes', StatusTes::LULUS) // Use Enum if available StatusTes::LULUS->value or 'lulus'
-            ->where('status_kelanjutan', StatusKelanjutan::KERTOSONO) // Use Enum StatusKelanjutan::KERTOSONO->value or 'kertosono'
+        $eligiblePesertaKediri = PesertaKediri::where('id_periode', $previousMonthPeriode)
+            ->where('status_tes', StatusTes::LULUS->value) // Use Enum if available StatusTes::LULUS->value or 'lulus'
+            ->where('status_kelanjutan', StatusKelanjutan::KERTOSONO->value) // Use Enum StatusKelanjutan::KERTOSONO->value or 'kertosono'
             ->get();
 
         if ($eligiblePesertaKediri->isEmpty()) {
-            Log::info("createKertosonoParticipantsFromPreviousMonth: No eligible PesertaKediri found for periode {$previousMonthPeriodeId}.");
+            Log::info("createKertosonoParticipantsFromPreviousMonth: No eligible PesertaKediri found for periode {$previousMonthPeriode}.");
             return 0; // No participants to create
         }
 
@@ -195,15 +202,15 @@ class PesertaKertosono extends Model
         $createdCount = 0;
 
         // 4. Create new PesertaKertosono records within a transaction
-        DB::transaction(function () use ($eligiblePesertaKediri, $currentPeriodeId, &$createdCount) {
+        DB::transaction(function () use ($eligiblePesertaKediri, $currentPeriode, &$createdCount) {
             foreach ($eligiblePesertaKediri as $pesertaKediri) {
                 // 5. Check if a PesertaKertosono already exists for this nispn and current period
                 $existing = PesertaKertosono::where('nispn', $pesertaKediri->nispn)
-                    ->where('id_periode', $currentPeriodeId)
+                    ->where('id_periode', $currentPeriode)
                     ->exists();
 
                 if ($existing) {
-                    Log::info("createKertosonoParticipantsFromPreviousMonth: Skipping NISPN {$pesertaKediri->nispn} - already exists in periode {$currentPeriodeId}.");
+                    Log::info("createKertosonoParticipantsFromPreviousMonth: Skipping NISPN {$pesertaKediri->nispn} - already exists in periode {$currentPeriode}.");
                     continue; // Skip if already exists
                 }
 
@@ -211,16 +218,16 @@ class PesertaKertosono extends Model
                 try {
                     PesertaKertosono::create([
                         'id_ponpes'         => $pesertaKediri->id_ponpes,
-                        'id_periode'        => $currentPeriodeId, // Use the current period ID
+                        'id_periode'        => $currentPeriode, // Use the current period ID
                         'nispn'             => $pesertaKediri->nispn,
-                        'tahap'             => Tahap::KERTOSONO, // Set Tahap Enum or 'kertosono'
+                        'tahap'             => Tahap::KERTOSONO->value, // Set Tahap Enum or 'kertosono'
                         'kelompok'          => null, // Set kelompok to null
                         'nomor_cocard'      => null, // Set nomor_cocard to null
-                        'status_tes'        => StatusTes::PRA_TES, // Set StatusTes Enum or 'pra-tes'
+                        'status_tes'        => StatusTesKertosono::PRA_TES->value, // Set StatusTes Enum or 'pra-tes'
                         'status_kelanjutan' => null, // Set status_kelanjutan to null
                     ]);
                     $createdCount++;
-                    Log::info("createKertosonoParticipantsFromPreviousMonth: Created PesertaKertosono for NISPN {$pesertaKediri->nispn} in periode {$currentPeriodeId}.");
+                    Log::info("createKertosonoParticipantsFromPreviousMonth: Created PesertaKertosono for NISPN {$pesertaKediri->nispn} in periode {$currentPeriode}.");
                 } catch (\Exception $e) {
                     Log::error("createKertosonoParticipantsFromPreviousMonth: Failed to create PesertaKertosono for NISPN {$pesertaKediri->nispn}. Error: " . $e->getMessage());
                     // The transaction will automatically rollback on exception
@@ -229,7 +236,7 @@ class PesertaKertosono extends Model
             }
         }); // End transaction
 
-        Log::info("createKertosonoParticipantsFromPreviousMonth: Successfully created {$createdCount} PesertaKertosono records for periode {$currentPeriodeId}.");
+        Log::info("createKertosonoParticipantsFromPreviousMonth: Successfully created {$createdCount} PesertaKertosono records for periode {$currentPeriode}.");
 
         return $createdCount; // Return the number of records created
     }
@@ -337,12 +344,20 @@ class PesertaKertosono extends Model
 
             SelectColumn::make('id_ponpes')
                 ->label('Asal Pondok')
-                ->options(Ponpes::with('daerah')->get()->map(function ($item) {
-                    return [
-                        'id' => $item->id_ponpes,
-                        'name' => "{$item->n_ponpes} ({$item->daerah->n_daerah})"
-                    ];
-                })->pluck('name', 'id')->toArray())
+                ->options(
+                    Ponpes::with('daerah')
+                        ->join('tb_daerah', 'tb_ponpes.id_daerah', '=', 'tb_daerah.id_daerah')
+                        ->orderByRaw('LOWER(tb_daerah.n_daerah), LOWER(tb_ponpes.n_ponpes)')
+                        ->get()
+                        ->map(function ($item) {
+                            return [
+                                'id' => $item->id_ponpes,
+                                'name' => "{$item->n_ponpes} ({$item->daerah->n_daerah})"
+                            ];
+                        })
+                        ->pluck('name', 'id')
+                        ->toArray()
+                )
                 ->searchable(),
 
             TextColumn::make('ponpes.n_ponpes')
@@ -518,24 +533,24 @@ class PesertaKertosono extends Model
                         ->grouped()
                         ->inline()
                         ->options(function (Get $get) {
-                            if ($get('status_tes') == StatusTesKertosono::LULUS) {
+                            if ($get('status_tes') == StatusTesKertosono::LULUS->value) {
                                 return [
-                                    StatusKelanjutanKertosono::KEDIRI->value => StatusKelanjutanKertosono::KEDIRI->value,
+                                    StatusKelanjutanKertosono::KEDIRI->value => StatusKelanjutanKertosono::KEDIRI->getLabel(),
                                 ];
                             }
-                            elseif (in_array($get('status_tes'), [StatusTesKertosono::TIDAK_LULUS_AKHLAK, StatusTesKertosono::TIDAK_LULUS_AKADEMIK])) {
+                            elseif (in_array($get('status_tes'), [StatusTesKertosono::TIDAK_LULUS_AKHLAK->value, StatusTesKertosono::TIDAK_LULUS_AKADEMIK->value])) {
                                 return [
-                                    StatusKelanjutanKertosono::PONDOK_ASAL->value => StatusKelanjutanKertosono::PONDOK_ASAL->value,
-                                    StatusKelanjutanKertosono::LENGKONG->value => StatusKelanjutanKertosono::LENGKONG->value,
-                                    StatusKelanjutanKertosono::KERTOSONO->value => StatusKelanjutanKertosono::KERTOSONO->value,
+                                    StatusKelanjutanKertosono::PONDOK_ASAL->value => StatusKelanjutanKertosono::PONDOK_ASAL->getLabel(),
+                                    StatusKelanjutanKertosono::LENGKONG->value => StatusKelanjutanKertosono::LENGKONG->getLabel(),
+                                    StatusKelanjutanKertosono::KERTOSONO->value => StatusKelanjutanKertosono::KERTOSONO->getLabel(),
                                 ];
                             }
                         })
                         ->required(
-                            fn (Get $get) => in_array($get('status_tes'), [StatusTesKertosono::LULUS, StatusTesKertosono::TIDAK_LULUS_AKHLAK, StatusTesKertosono::TIDAK_LULUS_AKADEMIK])
+                            fn (Get $get) => in_array($get('status_tes'), [StatusTesKertosono::LULUS->value, StatusTesKertosono::TIDAK_LULUS_AKHLAK->value, StatusTesKertosono::TIDAK_LULUS_AKADEMIK->value])
                         )
                         ->visible(
-                            fn (Get $get) => in_array($get('status_tes'), [StatusTesKertosono::LULUS, StatusTesKertosono::TIDAK_LULUS_AKHLAK, StatusTesKertosono::TIDAK_LULUS_AKADEMIK])
+                            fn (Get $get) => in_array($get('status_tes'), [StatusTesKertosono::LULUS->value, StatusTesKertosono::TIDAK_LULUS_AKHLAK->value, StatusTesKertosono::TIDAK_LULUS_AKADEMIK->value])
                         ),
                 ]),
         ];

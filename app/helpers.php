@@ -1,7 +1,43 @@
 <?php
 
+use App\Models\Ponpes;
+use App\Models\Siswa;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
+
+if (!function_exists('generateNispn')) {
+    /**
+     * Menghasilkan Nomor Induk Santri Pondok Pesantren Nasional (NISPN) berdasarkan ID Ponpes.
+     *
+     * @param int $id_ponpes ID unik Pondok Pesantren.
+     * @return string NISPN yang dihasilkan.
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException Jika Ponpes tidak ditemukan.
+     */
+    function generateNispn(int $id_ponpes): string
+    {
+        // 1. Dapatkan data Ponpes dan ID Daerah terkait
+        $ponpes = Ponpes::findOrFail($id_ponpes);
+        $id_daerah = $ponpes->id_daerah; // Asumsi id_daerah ada di tabel ponpes
+
+        // 2. Dapatkan komponen waktu saat ini
+        $tahun4digit = Carbon::now()->format('Y');
+        $bulan = Carbon::now()->format('m');
+
+        // 3. Dapatkan nomor urut (Counter) - Ingat potensi race condition!
+        // Transaksi dan unique constraint di DB tetap penting di bagian pemanggil.
+        $count = Siswa::count() + 1;
+
+        // 4. Format (Padding) semua komponen numerik
+        $idPonpes3digit = str_pad($id_ponpes, 3, '0', STR_PAD_LEFT);
+        $idDaerah3digit = str_pad($id_daerah, 3, '0', STR_PAD_LEFT);
+        $id_user7 = str_pad($count, 7, '0', STR_PAD_LEFT);
+
+        // 5. Gabungkan menjadi NISPN
+        $nispn = "{$tahun4digit}{$bulan}{$idPonpes3digit}{$idDaerah3digit}{$id_user7}";
+
+        return $nispn;
+    }
+}
 
 if(! function_exists('getPeriodePendaftaran')) {
     function getPeriodePendaftaran()
@@ -105,6 +141,69 @@ if(!function_exists('formatNamaProper')) {
 
         // Gabungkan gelar dan nama
         return implode(' ', array_merge($gelarDepan, [$namaProper], $gelarBelakang));
+    }
+}
+
+if (!function_exists('excelProper')) {
+    /**
+     * Meniru fungsi PROPER() di Excel.
+     * Mengkapitalisasi huruf pertama dan huruf setelah karakter non-huruf,
+     * serta mengubah huruf lainnya menjadi huruf kecil.
+     * Fungsi ini mendukung karakter multi-byte (UTF-8).
+     * Jika input null, mengembalikan string kosong.
+     *
+     * @param string|null $string String input yang akan diubah, atau null.
+     * @return string String yang sudah diubah ke format Proper Case, atau string kosong jika input null.
+     */
+    function excelProper(?string $string): string // Changed type hint to nullable: ?string
+    {
+        // *** START: Added null check ***
+        // Jika input adalah null, langsung kembalikan string kosong.
+        if ($string === null) {
+            return '';
+        }
+        // *** END: Added null check ***
+
+        // 1. Ubah seluruh string menjadi lowercase terlebih dahulu.
+        //    Ini menangani aturan "mengubah semua huruf lainnya menjadi huruf kecil".
+        //    Gunakan mb_strtolower untuk mendukung UTF-8 (misal: é, ç, à).
+        //    Kode ini hanya akan berjalan jika $string bukan null.
+        $string = mb_strtolower($string, 'UTF-8');
+
+        $result = '';
+        $len = mb_strlen($string, 'UTF-8');
+        $capitalizeNext = true; // Tandai untuk mengkapitalisasi huruf pertama yang ditemukan
+
+        // 2. Iterasi melalui setiap karakter dalam string
+        for ($i = 0; $i < $len; $i++) {
+            // Ambil karakter saat ini (aman untuk multi-byte)
+            $char = mb_substr($string, $i, 1, 'UTF-8');
+
+            // 3. Cek apakah karakter saat ini adalah huruf (menggunakan properti Unicode \p{L})
+            //    \p{L} cocok dengan huruf apa pun dalam standar Unicode.
+            $isLetter = preg_match('/^\p{L}$/u', $char);
+
+            if ($capitalizeNext && $isLetter) {
+                // Jika kita harus mengkapitalisasi dan karakter ini adalah huruf:
+                // - Ubah menjadi uppercase (aman untuk multi-byte)
+                // - Tambahkan ke hasil
+                // - Setel flag agar tidak mengkapitalisasi huruf berikutnya secara langsung
+                $result .= mb_strtoupper($char, 'UTF-8');
+                $capitalizeNext = false;
+            } else {
+                // Jika tidak perlu mengkapitalisasi, atau jika karakter ini bukan huruf:
+                // - Tambahkan karakter apa adanya ke hasil (sudah lowercase atau bukan huruf)
+                $result .= $char;
+
+                // 4. Cek apakah karakter saat ini BUKAN huruf.
+                //    Jika ya, maka huruf BERIKUTNYA (jika ada) harus dikapitalisasi.
+                if (!$isLetter) {
+                    $capitalizeNext = true;
+                }
+            }
+        }
+
+        return $result;
     }
 }
 

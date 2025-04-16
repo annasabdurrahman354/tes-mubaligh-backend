@@ -28,6 +28,12 @@ class RekapKinerjaKediriExporter extends Exporter
 
             ExportColumn::make('total_penyimakan_kediri')
                 ->label('Total Penyimakan'),
+
+            ExportColumn::make('total_durasi_penilaian_kediri')
+                ->label('Total Durasi Penilaian'),
+
+            ExportColumn::make('rata_rata_durasi_penilaian_kediri')
+                ->label('Rata-rata Durasi Penilaian'),
         ];
     }
 
@@ -36,11 +42,11 @@ class RekapKinerjaKediriExporter extends Exporter
         $periode_pengetesan_id = getPeriodeTes();
         $periode = getYearAndMonthName($periode_pengetesan_id);
 
-        $body = 'Data hasil kinerja guru Kediri periode '.$periode['monthName'].' '.$periode['year'].' sejumlah ' . number_format($export->successful_rows) . ' ' . str('row')->plural($export->successful_rows) . ' baris berhasil diekspor.';
+        $body = 'Data hasil kinerja guru Kediri periode '.$periode['monthName'].' '.$periode['year'].' sejumlah ' . number_format($export->successful_rows) . ' ' . str('baris')->plural($export->successful_rows) . ' berhasil diekspor.';
 
 
         if ($failedRowsCount = $export->getFailedRowsCount()) {
-            $body .= ' ' . number_format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' gagal diekspor.';
+            $body .= ' ' . number_format($failedRowsCount) . ' ' . str('baris')->plural($failedRowsCount) . ' gagal diekspor.';
         }
 
         return $body;

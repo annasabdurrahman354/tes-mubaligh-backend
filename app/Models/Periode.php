@@ -14,6 +14,7 @@ use Filament\Forms\Set;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rules\Unique;
@@ -38,6 +39,13 @@ class Periode extends Model
     protected $casts = [
         'bulan' => BulanNomor::class,
     ];
+
+    protected function recordTitle(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->bulan.' '.$this->tahun,
+        );
+    }
 
     public function scopeWithStatusTesPesertaKediri(Builder $query, $id_ponpes = null): void
     {

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Imports\UpdateNamaKecamatanImporter;
 use App\Filament\Resources\KecamatanResource\Pages\CreateKecamatan;
 use App\Filament\Resources\KecamatanResource\Pages\EditKecamatan;
 use App\Filament\Resources\KecamatanResource\Pages\ListKecamatans;
@@ -9,10 +10,13 @@ use App\Models\Kecamatan;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\QueryException;
 
 class KecamatanResource extends Resource
 {
@@ -45,6 +49,32 @@ class KecamatanResource extends Resource
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make()
                     ->requiresConfirmation(),
+            ])
+            ->headerActions([
+                Tables\Actions\ImportAction::make()
+                    ->label('Update Kecamatan')
+                    ->importer(UpdateNamaKecamatanImporter::class)
+                    ->color('danger')
+                    ->icon('heroicon-o-exclamation-circle')
+                    ->requiresConfirmation(),
+                Action::make('deleteAllKecamatan')
+                    ->label('Delete All Kecamatan')
+                    ->icon('heroicon-o-building-office') // Different icon example
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading('Delete All Kecamatan Data?')
+                    ->modalDescription('WARNING: This will permanently delete ALL records from the Kecamatan table. This action cannot be undone. Are you sure?')
+                    ->modalSubmitActionLabel('Yes, delete all Kecamatan')
+                    ->action(function () {
+                        try {
+                            Kecamatan::query()->delete();
+                            Notification::make()->title('Kecamatan Deleted')->body('All Kecamatan records have been deleted.')->success()->send();
+                        } catch (QueryException $e) {
+                            Notification::make()->title('Error Deleting Kecamatan')->body('Could not delete records. Check constraints or logs. Error: ' . $e->getMessage())->danger()->send();
+                        } catch (\Exception $e) {
+                            Notification::make()->title('Unexpected Error')->body('Could not delete Kecamatan records. Check logs.')->danger()->send();
+                        }
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

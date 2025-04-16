@@ -2,15 +2,19 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Imports\UpdateNamaProvinsiImporter;
 use App\Filament\Resources\ProvinsiResource\Pages\CreateProvinsi;
 use App\Filament\Resources\ProvinsiResource\Pages\EditProvinsi;
 use App\Filament\Resources\ProvinsiResource\Pages\ListProvinsis;
 use App\Models\Provinsi;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\QueryException;
 
 class ProvinsiResource extends Resource
 {
@@ -43,6 +47,32 @@ class ProvinsiResource extends Resource
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make()
                     ->requiresConfirmation(),
+            ])
+            ->headerActions([
+                Tables\Actions\ImportAction::make()
+                    ->label('Update Provinsi')
+                    ->importer(UpdateNamaProvinsiImporter::class)
+                    ->color('danger')
+                    ->icon('heroicon-o-exclamation-circle')
+                    ->requiresConfirmation(),
+                Action::make('deleteAllProvinsi')
+                    ->label('Delete All Provinsi')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading('Delete All Provinsi Data?')
+                    ->modalDescription('WARNING: This will permanently delete ALL records from the Provinsi table. This action cannot be undone. Are you sure?')
+                    ->modalSubmitActionLabel('Yes, delete all Provinsi')
+                    ->action(function () {
+                        try {
+                            Provinsi::query()->delete();
+                            Notification::make()->title('Provinsi Deleted')->body('All Provinsi records have been deleted.')->success()->send();
+                        } catch (QueryException $e) {
+                            Notification::make()->title('Error Deleting Provinsi')->body('Could not delete records. Check constraints or logs. Error: ' . $e->getMessage())->danger()->send();
+                        } catch (\Exception $e) {
+                            Notification::make()->title('Unexpected Error')->body('Could not delete Provinsi records. Check logs.')->danger()->send();
+                        }
+                    })
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

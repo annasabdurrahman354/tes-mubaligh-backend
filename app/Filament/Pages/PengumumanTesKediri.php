@@ -5,7 +5,9 @@ namespace App\Filament\Pages;
 use App\Enums\JenisKelamin;
 use App\Enums\KelompokKediri;
 use App\Enums\StatusTesKediri;
+use App\Models\Periode;
 use App\Models\PesertaKediri;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use CodeWithDennis\SimpleAlert\Components\Forms\SimpleAlert;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Section;
@@ -18,6 +20,7 @@ use Filament\Support\Enums\IconPosition;
 
 class PengumumanTesKediri extends Page implements HasForms
 {
+    use HasPageShield;
     use InteractsWithForms;
 
     protected static ?string $slug = 'pengumuman-tes-kediri';
@@ -38,11 +41,6 @@ class PengumumanTesKediri extends Page implements HasForms
 
     public function form(Form $form): Form
     {
-        $periode_pengetesan_id = getPeriodeTes();
-        $pesertaAktifCount = PesertaKediri::where('id_periode', $periode_pengetesan_id)
-            ->where('status_tes', StatusTesKediri::AKTIF->value)
-            ->count();
-
         return $form
             ->schema([
                 Section::make('Pilih Kelompok Tes')
@@ -56,12 +54,19 @@ class PengumumanTesKediri extends Page implements HasForms
                     ])
                     ->schema([
                         SimpleAlert::make('alert')
-                            ->title('Masih terdapat '. $pesertaAktifCount .' peserta yang belum ditentukan hasil tesnya!')
+                            ->title(function (){
+                                $pesertaAktifCount = PesertaKediri::where('id_periode', $this->data['id_periode'])
+                                    ->where('status_tes', StatusTesKediri::AKTIF->value)
+                                    ->count();
+                                return'Masih terdapat '. $pesertaAktifCount .' peserta yang belum ditentukan hasil tesnya!' ;
+                            })
                             ->description('Pastikan semua peserta telah ditentukan hasil tesnya terlebih dahulu melalui halaman hasil tes.')
                             ->danger()
                             ->columnSpanFull()
                             ->border()
-                            ->visible($pesertaAktifCount != 0)
+                            ->visible(fn() => PesertaKediri::where('id_periode', $this->data['id_periode'])
+                                    ->where('status_tes', StatusTesKediri::AKTIF->value)
+                                    ->count() != 0)
                             ->actions([
                                 Action::make('redirectHasilTes')
                                     ->label('Rekap Hasil Tes')
@@ -71,16 +76,34 @@ class PengumumanTesKediri extends Page implements HasForms
                                     ->url(HasilTesKediri::getUrl())
                                     ->color('danger'),
                             ]),
+                        Select::make('id_periode')
+                            ->label('Periode Tes')
+                            ->options(Periode::orderBy('id_periode', 'desc')->get()->pluck('id_periode', 'id_periode'))
+                            ->searchable()
+                            ->default(getPeriodeTes())
+                            ->columnSpanFull()
+                            ->live()
+                            ->afterStateUpdated(function (?string $state, ?string $old) {
+                               $this->pengumuman = null;
+                            }),
                         Select::make('jenis_kelamin')
                             ->label('Jenis Kelamin')
                             ->options(JenisKelamin::class)
                             ->default(JenisKelamin::LAKI_LAKI->value)
-                            ->columnSpan(1),
+                            ->columnSpan(1)
+                            ->live()
+                            ->afterStateUpdated(function (?string $state, ?string $old) {
+                                $this->pengumuman = null;
+                            }),
                         Select::make('kelompok')
                             ->label('Kelompok')
                             ->options(KelompokKediri::class)
                             ->default(KelompokKediri::A->value)
-                            ->columnSpan(1),
+                            ->columnSpan(1)
+                            ->live()
+                            ->afterStateUpdated(function (?string $state, ?string $old) {
+                                $this->pengumuman = null;
+                            }),
                     ])
             ])
             ->statePath('data');
@@ -88,17 +111,16 @@ class PengumumanTesKediri extends Page implements HasForms
 
     public function generatePengumuman()
     {
-        $periode_pengetesan_id = getPeriodeTes();
-        $periode = getYearAndMonthName($periode_pengetesan_id);
+        $periode = getYearAndMonthName($this->data['id_periode']);
 
         $this->pengumuman = PesertaKediri::with(['siswa', 'ponpes', 'akhlak', 'akademik'])
             ->withHasilSistem()
-            ->where('id_periode', $periode_pengetesan_id)
+            ->where('id_periode', $this->data['id_periode'])
             ->whereHas('siswa', function ($query) {
                 $query->where('jenis_kelamin', $this->data['jenis_kelamin']);
             })
             ->where('kelompok', $this->data['kelompok'])
-            ->orderBy('nomor_cocard')
+            ->orderByRaw('CONVERT(nomor_cocard, SIGNED) ASC')
             ->get()
             ->map(function ($peserta) use ($periode) {
                 return [
@@ -121,5 +143,14 @@ class PengumumanTesKediri extends Page implements HasForms
                 ];
             })
             ->toArray();
+    }
+
+    public function printPengumuman()
+    {
+        $this->js('document.getElementById("button-print").onclick = function() {
+        document.body.innerHTML = document.getElementById("view-print").innerHTML;
+        window.print();
+        location.reload();
+    };');
     }
 }

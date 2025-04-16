@@ -21,6 +21,7 @@ class AkademikKediriController extends Controller
             'nilai_penjelasan' => 'required|numeric|min:0|max:100',
             'nilai_pemahaman' => 'required|numeric|min:0|max:100',
             'catatan' => 'nullable',
+            'durasi_penilaian' => 'required|numeric|min:0',
         ], [
             'tes_santri_id.required' => 'ID tes santri wajib diisi.',
             'tes_santri_id.exists' => 'ID tes santri tidak ditemukan dalam database.',
@@ -40,6 +41,9 @@ class AkademikKediriController extends Controller
             'nilai_pemahaman.numeric' => 'Nilai pemahaman harus berupa angka.',
             'nilai_pemahaman.min' => 'Nilai pemahaman minimal adalah 0.',
             'nilai_pemahaman.max' => 'Nilai pemahaman maksimal adalah 100.',
+            'durasi_penilaian.required' => 'Durasi penilaian wajib diisi.',
+            'durasi_penilaian.numeric' => 'Durasi penilaian harus berupa angka.',
+            'durasi_penilaian.min' => 'Durasi penilaian tidak boleh kurang dari 0.',
         ]);
 
         $validated['guru_id'] = Auth::id();

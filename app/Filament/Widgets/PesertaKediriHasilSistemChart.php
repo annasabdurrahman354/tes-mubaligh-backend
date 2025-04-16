@@ -5,11 +5,13 @@ namespace App\Filament\Widgets;
 use App\Enums\HasilSistem;
 use App\Enums\StatusTesKediri;
 use App\Models\PesertaKediri;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Illuminate\Contracts\View\View;
 use Leandrocfe\FilamentApexCharts\Widgets\ApexChartWidget;
 
 class PesertaKediriHasilSistemChart extends ApexChartWidget
 {
+    use HasWidgetShield;
     /**
      * Chart Id
      */

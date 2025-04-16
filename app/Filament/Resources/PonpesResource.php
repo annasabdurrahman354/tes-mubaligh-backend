@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Exports\PonpesExporter;
 use App\Filament\Resources\PondokResource\Pages\CreatePondok;
 use App\Filament\Resources\PondokResource\Pages\EditPondok;
 use App\Filament\Resources\PondokResource\Pages\ListPondok;
@@ -45,6 +46,11 @@ class PonpesResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     //Tables\Actions\ForceDeleteBulkAction::make(),
                 ]),
+            ])
+            ->headerActions([
+                Tables\Actions\ExportAction::make()
+                    ->label('Ekspor')
+                    ->exporter(PonpesExporter::class),
             ])
             ->selectCurrentPageOnly()
             ->striped();

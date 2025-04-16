@@ -6,11 +6,13 @@ use App\Enums\HasilSistem;
 use App\Enums\StatusTesKertosono;
 use App\Models\PesertaKediri;
 use App\Models\PesertaKertosono;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Illuminate\Contracts\View\View;
 use Leandrocfe\FilamentApexCharts\Widgets\ApexChartWidget;
 
 class PesertaKertosonoHasilSistemChart extends ApexChartWidget
 {
+    use HasWidgetShield;
     /**
      * Chart Id
      */

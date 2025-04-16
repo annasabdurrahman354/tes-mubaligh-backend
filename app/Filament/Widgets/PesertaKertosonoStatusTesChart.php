@@ -4,10 +4,12 @@ namespace App\Filament\Widgets;
 
 use App\Models\Periode;
 use App\Models\Ponpes;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Leandrocfe\FilamentApexCharts\Widgets\ApexChartWidget;
 
 class PesertaKertosonoStatusTesChart extends ApexChartWidget
 {
+    use HasWidgetShield;
     /**
      * Chart Id
      */

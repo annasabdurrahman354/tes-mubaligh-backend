@@ -3,16 +3,16 @@
         <form wire:submit="generatePengumuman" class="fi-form">
             {{ $this->form }}
         </form>
-        @if(!empty($pengumuman))
+        @if($pengumuman != [] && $pengumuman != null)
             <x-filament::section class="mt-6 overflow-auto" wire:loading.remove>
                 <x-slot name="heading">
                     Pengumuman Hasil Tes
                 </x-slot>
                 <x-slot name="headerEnd">
-                    <x-filament::button id="button-print" color="success" wire:loading.remove>
+                    <x-filament::button wire:click="printPengumuman" id="button-print" color="primary" wire:loading.remove>
                         Print
                     </x-filament::button>
-                    <x-filament::button color="secondary" disabled wire:loading>
+                    <x-filament::button color="primary" disabled wire:loading>
                         Loading...
                     </x-filament::button>
                 </x-slot>
@@ -68,7 +68,7 @@
                     </div>
                 </div>
             </x-filament::section>
-        @else
+        @elseif($pengumuman == [] && $pengumuman != null)
             <div class="mt-6" wire:loading.remove>
                 Tidak ada data peserta!
             </div>
@@ -147,11 +147,3 @@
         }
     </style>
 @endpush
-
-<script>
-    document.getElementById("button-print").onclick = function() {
-        document.body.innerHTML = document.getElementById('view-print').innerHTML;
-        window.print();
-        location.reload();
-    };
-</script>
