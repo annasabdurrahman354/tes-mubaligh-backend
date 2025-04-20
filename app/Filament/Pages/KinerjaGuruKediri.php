@@ -2,10 +2,11 @@
 
 namespace App\Filament\Pages;
 
-use App\Filament\Exports\RekapKinerjaKediriExporter;
+use App\Filament\Exports\KinerjaGuruKediriExporter;
 use App\Models\User;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Fieldset;
 use Filament\Pages\Page;
 use Filament\Tables\Actions\ExportAction;
 use Filament\Tables\Columns\TextColumn;
@@ -16,18 +17,18 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Query\Builder;
 
-class RekapKinerjaKediri extends Page implements HasTable
+class KinerjaGuruKediri extends Page implements HasTable
 {
     use HasPageShield;
     use InteractsWithTable;
 
-    protected static ?string $slug = 'rekap-kinerja-kediri';
-    protected static ?string $title = 'Rekap Kinerja Kediri';
-    protected static ?string $navigationLabel = 'Rekap Kinerja';
+    protected static ?string $slug = 'kinerja-guru-kediri';
+    protected static ?string $title = 'Kinerja Guru Kediri';
+    protected static ?string $navigationLabel = 'Kinerja Guru';
     protected static ?string $navigationGroup = 'Pengetesan Kediri';
     protected static ?string $navigationIcon = 'heroicon-o-trophy';
 
-    protected static string $view = 'filament.pages.rekap-kinerja-kediri';
+    protected static string $view = 'filament.pages.kinerja-guru-kediri';
 
     public function table(Table $table): Table
     {
@@ -42,7 +43,7 @@ class RekapKinerjaKediri extends Page implements HasTable
                         $query->where('name', 'Guru Kediri');
                     })
             )
-            ->description(fn() => 'Rekap Kinerja Tes Periode '.$periode['monthName'].' '.$periode['year'])
+            ->description(fn() => 'Kinerja Guru Tes Periode '.$periode['monthName'].' '.$periode['year'])
             ->columns([
                 TextColumn::make('id')
                     ->label('ID')
@@ -104,11 +105,16 @@ class RekapKinerjaKediri extends Page implements HasTable
             ->filters([
                 Filter::make('akademik_kediri_created_at') // Unique key for the filter
                     ->form([
-                        DatePicker::make('created_from')
-                            ->label('Dari'), // Label for start date
-                        DatePicker::make('created_until')
-                            ->label('Sampai'), // Label for end date
+                        Fieldset::make()
+                            ->schema([
+                                DatePicker::make('created_from')
+                                    ->label('Mulai tgl'),
+                                DatePicker::make('created_until')
+                                    ->label('Sampai Tgl')
+                            ])
+                            ->columnSpanFull()
                     ])
+                    ->columnSpanFull()
                     ->query(function ($query, array $data) {
                         $from = $data['created_from'] ?? null;
                         $until = $data['created_until'] ?? null;
@@ -135,7 +141,7 @@ class RekapKinerjaKediri extends Page implements HasTable
             ->headerActions([
                 ExportAction::make()
                     ->label('Ekspor')
-                    ->exporter(RekapKinerjaKediriExporter::class)
+                    ->exporter(KinerjaGuruKediriExporter::class)
                     ->modifyQueryUsing(fn (Builder $query) => $query->with(['roles'])
                         ->whereHas('roles', function ($query) {
                             $query->where('name', 'Guru Kediri');

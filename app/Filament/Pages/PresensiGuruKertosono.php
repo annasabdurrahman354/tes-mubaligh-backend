@@ -21,18 +21,18 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\DB;
 
-class PresensiGuruKediri extends Page implements HasForms
+class PresensiGuruKertosono extends Page implements HasForms
 {
     use HasPageShield;
     use InteractsWithForms;
 
-    protected static ?string $slug = 'presensi-guru-kediri';
-    protected static ?string $title = 'Presensi Guru Kediri';
+    protected static ?string $slug = 'presensi-guru-kertosono';
+    protected static ?string $title = 'Presensi Guru Kertosono';
     protected static ?string $navigationLabel = 'Presensi Guru';
-    protected static ?string $navigationGroup = 'Pengetesan Kediri';
+    protected static ?string $navigationGroup = 'Pengetesan Kertosono';
     protected static ?string $navigationIcon = 'heroicon-o-document-check';
 
-    protected static string $view = 'filament.pages.presensi-guru-kediri';
+    protected static string $view = 'filament.pages.presensi-guru-kertosono';
     public ?array $data = [];
 
     public array $attendanceData = [];
@@ -171,12 +171,12 @@ class PresensiGuruKediri extends Page implements HasForms
         // --- Get Users ---
         $users = User::query()
             ->with('roles')
-            ->whereHas('roles', fn($query) => $query->where('name', 'Guru Kediri'))
+            ->whereHas('roles', fn($query) => $query->where('name', 'Guru Kertosono'))
             ->orderBy('username')
             ->get();
 
         // --- Get distinct dates based on the FINAL start and end dates ---
-        $distinctDates = DB::table('tes_akademik_kediri')
+        $distinctDates = DB::table('tes_akademik_kertosono')
             ->selectRaw('DATE(created_at) as date')
             // Use the calculated $start and $end
             ->whereBetween('created_at', [$start, $end])
@@ -188,10 +188,27 @@ class PresensiGuruKediri extends Page implements HasForms
         // --- Create structure for table headers ---
         $this->distinctTanggalSesi = [];
         foreach ($distinctDates as $date) {
-            if (Carbon::parse($date)->between($start, $end)) {
-                $this->distinctTanggalSesi[$date] = $sessions;
+            $this->distinctTanggalSesi[$date] = [];
+
+            foreach ($sessions as $session) {
+                $sessionStart = Carbon::parse("$date {$session['start']}");
+                $sessionEnd = Carbon::parse("$date {$session['end']}");
+
+                $exists = DB::table('tes_akademik_kertosono')
+                    ->whereBetween('created_at', [$sessionStart, $sessionEnd])
+                    ->exists();
+
+                if ($exists) {
+                    $this->distinctTanggalSesi[$date][] = $session;
+                }
+            }
+
+            // Optional: remove the date if no session exists at all
+            if (empty($this->distinctTanggalSesi[$date])) {
+                unset($this->distinctTanggalSesi[$date]);
             }
         }
+
         // Re-key the array if dates were skipped (optional, depends on desired output)
         // $this->distinctTanggalSesi = array_values($this->distinctTanggalSesi);
 
@@ -210,7 +227,7 @@ class PresensiGuruKediri extends Page implements HasForms
             ];
 
             // Fetch user's presensi within the FINAL start and end dates
-            $presensi = $user->akademikKediri()
+            $presensi = $user->akademikKertosono()
                 ->whereBetween('created_at', [$start, $end])
                 ->get()
                 ->groupBy(fn($item) => Carbon::parse($item->created_at)->toDateString());
@@ -304,7 +321,7 @@ class PresensiGuruKediri extends Page implements HasForms
                 return;
             }
             var ctx = {
-                worksheet: 'Presensi Guru Kediri',
+                worksheet: 'Presensi Guru Kertosono',
                 table: table.innerHTML
             };
             var link = document.createElement('a');

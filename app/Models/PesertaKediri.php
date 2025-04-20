@@ -219,6 +219,7 @@ class PesertaKediri extends Model
     public function scopeWithHasilSistem($query): void
     {
         $query->addSelect([
+            // Kolom rata-rata individu tetap sama (jika masih dibutuhkan)
             'avg_nilai_makna' => AkademikKediri::selectRaw('AVG(nilai_makna)')
                 ->whereColumn('tes_santri_id', 'tb_tes_santri.id_tes_santri'),
 
@@ -231,22 +232,24 @@ class PesertaKediri extends Model
             'avg_nilai_pemahaman' => AkademikKediri::selectRaw('AVG(nilai_pemahaman)')
                 ->whereColumn('tes_santri_id', 'tb_tes_santri.id_tes_santri'),
 
-            'avg_nilai' => AkademikKediri::selectRaw('(
-                (AVG(nilai_makna)) +
-                (AVG(nilai_keterangan)) +
-                (AVG(nilai_penjelasan)) +
-                (AVG(nilai_pemahaman))
-            ) / 4')
+            // Modifikasi avg_nilai untuk menggunakan bobot
+            'avg_nilai' => AkademikKediri::selectRaw('
+                (AVG(nilai_makna) * 0.20) +
+                (AVG(nilai_keterangan) * 0.20) +
+                (AVG(nilai_penjelasan) * 0.30) +
+                (AVG(nilai_pemahaman) * 0.30)
+            ')
                 ->whereColumn('tes_santri_id', 'tb_tes_santri.id_tes_santri'),
 
+            // Modifikasi hasil_sistem untuk menggunakan perhitungan bobot
             'hasil_sistem' => AkademikKediri::selectRaw("CASE
                 WHEN (SELECT COUNT(*) FROM tes_akademik_kediri WHERE tes_akademik_kediri.tes_santri_id = tb_tes_santri.id_tes_santri) = 0
                     THEN '".HasilSistem::BELUM_PENGETESAN->getLabel()."'
                 WHEN (
-                    (AVG(nilai_makna) +
-                    AVG(nilai_keterangan) +
-                    AVG(nilai_penjelasan) +
-                    AVG(nilai_pemahaman)) / 4
+                    (AVG(nilai_makna) * 0.20) +
+                    (AVG(nilai_keterangan) * 0.20) +
+                    (AVG(nilai_penjelasan) * 0.30) +
+                    (AVG(nilai_pemahaman) * 0.30)
                 ) >= 70
                     THEN '".HasilSistem::LULUS->getLabel()."'
                 ELSE '".HasilSistem::TIDAK_LULUS_AKADEMIK->getLabel()."'

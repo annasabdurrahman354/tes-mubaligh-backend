@@ -7,7 +7,7 @@ use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
 
-class RekapKinerjaKertosonoExporter extends Exporter
+class KinerjaGuruKertosonoExporter extends Exporter
 {
     protected static ?string $model = User::class;
 

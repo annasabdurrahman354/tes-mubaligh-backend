@@ -73,7 +73,7 @@ class Ponpes extends Model
                         ->havingRaw("
                         CASE
                             WHEN COUNT(tes_akademik_kediri.id) = 0 THEN ?
-                            WHEN AVG((nilai_makna + nilai_keterangan + nilai_penjelasan + nilai_pemahaman) / 4) >= 70 THEN ?
+                            WHEN AVG(nilai_makna * 0.2 + nilai_keterangan * 0.2 + nilai_penjelasan * 0.3 + nilai_pemahaman * 0.3) >= 70 THEN ?
                             ELSE ?
                         END = ?", [
                             HasilSistem::BELUM_PENGETESAN->getLabel(),
@@ -95,7 +95,7 @@ class Ponpes extends Model
                         ->havingRaw("
                         CASE
                             WHEN COUNT(tes_akademik_kediri.id) = 0 THEN ?
-                            WHEN AVG((nilai_makna + nilai_keterangan + nilai_penjelasan + nilai_pemahaman) / 4) >= 70 THEN ?
+                            WHEN AVG(nilai_makna * 0.2 + nilai_keterangan * 0.2 + nilai_penjelasan * 0.3 + nilai_pemahaman * 0.3) >= 70 THEN ?
                             ELSE ?
                         END = ?", [
                             HasilSistem::BELUM_PENGETESAN->getLabel(),

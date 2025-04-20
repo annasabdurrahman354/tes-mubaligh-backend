@@ -24,11 +24,29 @@ class PesertaKertosonoExporter extends Exporter
             ExportColumn::make('siswa.nik')
                 ->label('NIK'),
 
+            ExportColumn::make('siswa.nis')
+                ->label('NIS Lama'),
+
+            ExportColumn::make('siswa.rfid')
+                ->label('RFID'),
+
             ExportColumn::make('nomor_cocard')
                 ->label('Cocard'),
 
+            ExportColumn::make('status_tes')
+                ->label('Status Tes')
+                ->state(function (PesertaKertosono $record) {
+                    return $record->status_tes?->getLabel();
+                }),
+
+            ExportColumn::make('status_kelanjutan')
+                ->label('Status Kelajutan')
+                ->state(function (PesertaKertosono $record) {
+                    return $record->status_kelanjutan?->getLabel();
+                }),
+
             ExportColumn::make('siswa.nama_lengkap')
-                ->label('Nama'),
+                ->label('Nama Lengkap'),
 
             ExportColumn::make('siswa.nama_panggilan')
                 ->label('Nama Panggilan'),
@@ -58,8 +76,38 @@ class PesertaKertosonoExporter extends Exporter
                     return Carbon::parse($tanggalLahir)->age;
                 }),
 
+            ExportColumn::make('siswa.status_nikah')
+                ->label('Status Pernikahan'),
+
+            ExportColumn::make('siswa.anak_ke')
+                ->label('Anak Ke-'),
+
+            ExportColumn::make('siswa.dari_saudara')
+                ->label('Jumlah Saudara'),
+
+            ExportColumn::make('siswa.nama_ayah')
+                ->label('Nama Ayah'),
+
+            ExportColumn::make('siswa.status_hidup_ayah')
+                ->label('Status Ayah'),
+
+            ExportColumn::make('siswa.nama_ibu')
+                ->label('Nama Ibu'),
+
+            ExportColumn::make('siswa.status_hidup_ibu')
+                ->label('Status Ibu'),
+
             ExportColumn::make('siswa.hp')
                 ->label('HP'),
+
+            ExportColumn::make('siswa.hp_ayah')
+                ->label('HP Ayah'),
+
+            ExportColumn::make('siswa.hp_ibu')
+                ->label('HP Ibu'),
+
+            ExportColumn::make('siswa.email')
+                ->label('Email'),
 
             ExportColumn::make('siswa.alamat')
                 ->label('Alamat'),
@@ -127,29 +175,17 @@ class PesertaKertosonoExporter extends Exporter
             ExportColumn::make('siswa.riwayat_sakit')
                 ->label('Riwayat Sakit'),
 
-            ExportColumn::make('siswa.nama_ayah')
-                ->label('Nama Ayah'),
+            ExportColumn::make('siswa.alergi')
+                ->label('Alergi'),
 
-            ExportColumn::make('siswa.nama_ibu')
-                ->label('Nama Ibu'),
+            ExportColumn::make('siswa.gol_darah')
+                ->label('Golongan Darah'),
 
-            ExportColumn::make('rekomendasi_guru')
-                ->label('Direkomendasikan')
-                ->state(function (PesertaKertosono $record) {
-                    return $record->rekomendasi_guru;
-                }),
+            ExportColumn::make('siswa.tinggi_badan')
+                ->label('Tinggi Badan'),
 
-            ExportColumn::make('status_tes')
-                ->label('Status Tes')
-                ->state(function (PesertaKertosono $record) {
-                    return $record->status_tes?->getLabel();
-                }),
-
-            ExportColumn::make('status_kelanjutan')
-                ->label('Status Kelajutan')
-                ->state(function (PesertaKertosono $record) {
-                    return $record->status_kelanjutan?->getLabel();
-                }),
+            ExportColumn::make('siswa.berat_badan')
+                ->label('Berat Badan'),
         ];
     }
 

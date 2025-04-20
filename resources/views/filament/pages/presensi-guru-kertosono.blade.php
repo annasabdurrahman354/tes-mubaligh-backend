@@ -7,7 +7,7 @@
         @if($attendanceData != [] && $distinctTanggalSesi != [])
             <x-filament::section wire:loading.remove>
                 <x-slot name="heading">
-                    Presensi Guru Kediri
+                    Presensi Guru Kertosono
                 </x-slot>
 
                 <x-slot name="headerEnd">
@@ -24,7 +24,7 @@
                         <thead>
                         <tr>
                             <th style="border: 1px solid #CBD5E1; text-align: left;" colspan="{{ array_sum(array_map('count', $distinctTanggalSesi)) + 5 }}">
-                                PRESENSI PENYIMAKAN TES KEDIRI
+                                PRESENSI PENYIMAKAN TES KERTOSONO
                             </th>
                         </tr>
                         <tr>

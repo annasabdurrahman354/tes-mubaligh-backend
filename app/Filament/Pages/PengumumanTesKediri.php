@@ -16,6 +16,7 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Pages\Page;
+use Filament\Notifications\Notification; // Added for notifications
 use Filament\Support\Enums\IconPosition;
 
 class PengumumanTesKediri extends Page implements HasForms
@@ -31,26 +32,33 @@ class PengumumanTesKediri extends Page implements HasForms
 
     protected static string $view = 'filament.pages.pengumuman-tes-kediri';
     public ?array $data = [];
-    public $pengumuman = null;
+    // Changed state variable to hold data per group
+    public $pengumumanPerKelompok = null;
 
     public function mount(): void
     {
+        // Fill form, but don't generate automatically on mount
         $this->form->fill();
-        $this->generatePengumuman();
+        // $this->generatePengumuman(); // Removed auto-generation
     }
 
     public function form(Form $form): Form
     {
         return $form
             ->schema([
-                Section::make('Pilih Kelompok Tes')
-                    ->label('Filter Kelompok')
+                Section::make('Filter Data')
                     ->columns(2)
                     ->headerActions([
-                        Action::make('generatePengumuman')
-                            ->label('Generate Pengumuman')
-                            ->action('generatePengumuman')
+                        // Action for generating single kelompok
+                        Action::make('generatePengumumanKelompok')
+                            ->label('Generate Per Kelompok')
+                            ->action('generatePengumumanKelompok')
                             ->color('success'),
+                        // Action for generating all kelompok for selected gender
+                        Action::make('generatePengumumanAllKelompok')
+                            ->label(fn () => 'Generate Kelompok ' . $this->getJenisKelaminLabel())
+                            ->action('generatePengumumanAllKelompok')
+                            ->color('info'),
                     ])
                     ->schema([
                         SimpleAlert::make('alert')
@@ -58,7 +66,7 @@ class PengumumanTesKediri extends Page implements HasForms
                                 $pesertaAktifCount = PesertaKediri::where('id_periode', $this->data['id_periode'])
                                     ->where('status_tes', StatusTesKediri::AKTIF->value)
                                     ->count();
-                                return'Masih terdapat '. $pesertaAktifCount .' peserta yang belum ditentukan hasil tesnya!' ;
+                                return 'Masih terdapat '. $pesertaAktifCount .' peserta yang belum ditentukan hasil tesnya!' ;
                             })
                             ->description('Pastikan semua peserta telah ditentukan hasil tesnya terlebih dahulu melalui halaman hasil tes.')
                             ->danger()
@@ -73,7 +81,7 @@ class PengumumanTesKediri extends Page implements HasForms
                                     ->icon('heroicon-m-arrow-long-right')
                                     ->iconPosition(IconPosition::After)
                                     ->link()
-                                    ->url(HasilTesKediri::getUrl())
+                                    ->url(HasilTesKediri::getUrl()) // Assuming HasilTesKediri has getUrl()
                                     ->color('danger'),
                             ]),
                         Select::make('id_periode')
@@ -84,42 +92,60 @@ class PengumumanTesKediri extends Page implements HasForms
                             ->columnSpanFull()
                             ->live()
                             ->afterStateUpdated(function (?string $state, ?string $old) {
-                               $this->pengumuman = null;
+                                // Reset data when filter changes
+                                $this->pengumumanPerKelompok = null;
                             }),
                         Select::make('jenis_kelamin')
                             ->label('Jenis Kelamin')
                             ->options(JenisKelamin::class)
                             ->default(JenisKelamin::LAKI_LAKI->value)
+                            ->required() // Keep required as it's needed for both actions
                             ->columnSpan(1)
                             ->live()
                             ->afterStateUpdated(function (?string $state, ?string $old) {
-                                $this->pengumuman = null;
+                                $this->pengumumanPerKelompok = null;
                             }),
                         Select::make('kelompok')
                             ->label('Kelompok')
                             ->options(KelompokKediri::class)
                             ->default(KelompokKediri::A->value)
+                            // Not strictly required overall, but needed for 'generatePengumumanKelompok'
+                            // Validation happens inside the action method
                             ->columnSpan(1)
                             ->live()
                             ->afterStateUpdated(function (?string $state, ?string $old) {
-                                $this->pengumuman = null;
+                                $this->pengumumanPerKelompok = null;
                             }),
                     ])
             ])
             ->statePath('data');
     }
 
-    public function generatePengumuman()
+    // Helper function to get gender label (copied from RekapPenyimakanKediri)
+    public function getJenisKelaminLabel(): string
+    {
+        if (empty($this->data['jenis_kelamin'])) {
+            // Should not happen if required() is set, but good fallback
+            return 'Semua';
+        }
+        // Ensure the value exists in the Enum before trying to use it
+        $enumValue = JenisKelamin::tryFrom($this->data['jenis_kelamin']);
+        return $enumValue ? $enumValue->getLabel() : 'Tidak Valid';
+    }
+
+    // Helper function to fetch and format announcement data for a given kelompok
+    private function fetchPengumumanData(string $kelompokValue): array
     {
         $periode = getYearAndMonthName($this->data['id_periode']);
 
-        $this->pengumuman = PesertaKediri::with(['siswa', 'ponpes', 'akhlak', 'akademik'])
+        return PesertaKediri::with(['siswa', 'ponpes', 'akhlak', 'akademik'])
             ->withHasilSistem()
             ->where('id_periode', $this->data['id_periode'])
+            ->whereIn('status_tes', [StatusTesKediri::AKTIF, StatusTesKediri::LULUS, StatusTesKediri::TIDAK_LULUS_AKADEMIK, StatusTesKediri::TIDAK_LULUS_AKHLAK])
             ->whereHas('siswa', function ($query) {
                 $query->where('jenis_kelamin', $this->data['jenis_kelamin']);
             })
-            ->where('kelompok', $this->data['kelompok'])
+            ->where('kelompok', $kelompokValue) // Filter by the specific kelompok
             ->orderByRaw('CONVERT(nomor_cocard, SIGNED) ASC')
             ->get()
             ->map(function ($peserta) use ($periode) {
@@ -134,9 +160,9 @@ class PengumumanTesKediri extends Page implements HasForms
                     'ponpes' => optional($peserta->ponpes)->n_ponpes
                         ? strtoupper(optional($peserta->ponpes)->n_ponpes)
                         : null,
-                    'daerah_ponpes' => optional($peserta->ponpes->daerah)->n_daerah,
-                    'poin_akhlak' => $peserta->totalPoinAkhlak,
-                    'nilai_akademik' => $peserta->avg_nilai !== null ? number_format($peserta->avg_nilai, 1) : null,
+                    'daerah_ponpes' => optional(optional($peserta->ponpes)->daerah)->n_daerah, // Corrected optional chaining
+                    'poin_akhlak' => $peserta->totalPoinAkhlak, // Assuming this attribute exists from withHasilSistem
+                    'nilai_akademik' => $peserta->avg_nilai !== null ? number_format($peserta->avg_nilai, 1) : null, // Assuming this attribute exists from withHasilSistem
                     'status' => optional($peserta->status_tes)->getLabel(),
                     'periode_bulan' => $periode['monthName'] ?? null,
                     'periode_tahun' => $periode['year'] ?? null,
@@ -145,12 +171,95 @@ class PengumumanTesKediri extends Page implements HasForms
             ->toArray();
     }
 
+    // Action to generate announcement for a SINGLE selected kelompok
+    public function generatePengumumanKelompok()
+    {
+        // Validate that kelompok is selected for this specific action
+        if (empty($this->data['kelompok'])) {
+            Notification::make()
+                ->danger()
+                ->title('Kelompok Belum Dipilih')
+                ->body('Silakan pilih Kelompok terlebih dahulu untuk generate per kelompok.')
+                ->send();
+            return;
+        }
+
+        $this->pengumumanPerKelompok = []; // Reset before generating
+
+        $selectedKelompok = $this->data['kelompok'];
+        $pengumumanData = $this->fetchPengumumanData($selectedKelompok);
+
+        if (!empty($pengumumanData)) {
+            $this->pengumumanPerKelompok[$selectedKelompok] = $pengumumanData;
+        } else {
+            Notification::make()
+                ->warning()
+                ->title('Tidak Ditemukan Peserta')
+                ->body("Tidak ada peserta yang cocok untuk Periode {$this->data['id_periode']}, Jenis Kelamin {$this->getJenisKelaminLabel()}, dan Kelompok {$selectedKelompok}.")
+                ->send();
+        }
+    }
+
+    // Action to generate announcement for ALL kelompok for the selected gender
+    public function generatePengumumanAllKelompok()
+    {
+        $this->pengumumanPerKelompok = []; // Reset before generating
+        $foundAnyPeserta = false;
+
+        foreach (KelompokKediri::cases() as $kelompokEnum) {
+            $kelompokValue = $kelompokEnum->value;
+            $pengumumanData = $this->fetchPengumumanData($kelompokValue);
+
+            if (!empty($pengumumanData)) {
+                $this->pengumumanPerKelompok[$kelompokValue] = $pengumumanData;
+                $foundAnyPeserta = true;
+            }
+        }
+
+        // Sort the results by kelompok key (A, B, C...)
+        ksort($this->pengumumanPerKelompok);
+
+        if (!$foundAnyPeserta) {
+            Notification::make()
+                ->warning()
+                ->title('Tidak Ditemukan Peserta')
+                ->body("Tidak ada peserta yang cocok untuk Periode {$this->data['id_periode']} dan Jenis Kelamin {$this->getJenisKelaminLabel()} di semua kelompok.")
+                ->send();
+        }
+    }
+
+
+    // Keep the original print function - it targets #view-print which will now contain all groups
     public function printPengumuman()
     {
-        $this->js('document.getElementById("button-print").onclick = function() {
-        document.body.innerHTML = document.getElementById("view-print").innerHTML;
-        window.print();
-        location.reload();
-    };');
+        // Slightly more robust JS
+        $this->js('
+            const printContent = document.getElementById("view-print");
+            const printButton = document.getElementById("button-print");
+            if (printButton) {
+                printButton.style.display = "none"; // Hide button itself for print
+            }
+            if (printContent) {
+                const originalBody = document.body.innerHTML;
+                const originalTitle = document.title;
+
+                // Try to find a relevant title
+                const periode = "' . ($this->data['id_periode'] ?? 'N/A') .'";
+                const gender = "' . ($this->getJenisKelaminLabel() ?? 'N/A') .'";
+                document.title = `Pengumuman Tes Kediri - ${periode} - ${gender}`;
+
+                document.body.innerHTML = printContent.innerHTML;
+                window.print();
+                document.body.innerHTML = originalBody; // Restore original content
+                document.title = originalTitle; // Restore title
+                location.reload(); // Reload to restore Livewire/Filament state
+            } else {
+                console.error("Element with ID view-print not found.");
+                alert("Error: Could not find content to print.");
+                if (printButton) {
+                    printButton.style.display = ""; // Show button again if print failed
+                }
+            }
+        ');
     }
 }

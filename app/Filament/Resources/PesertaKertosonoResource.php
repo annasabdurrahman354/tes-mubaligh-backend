@@ -11,6 +11,7 @@ use App\Filament\Resources\PesertaKertosonoResource\Pages\ViewPesertaKertosono;
 use App\Models\Periode;
 use App\Models\PesertaKertosono;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -85,21 +86,51 @@ class PesertaKertosonoResource extends Resource
             ->headerActions([
                 Action::make('transfer_peserta')
                     ->label('Transfer Peserta')
-                    ->action(function () {
-                        PesertaKertosono::createKertosonoParticipantsFromPreviousMonth();
-                    })
                     ->color('danger')
                     ->icon('heroicon-o-exclamation-circle')
-                    ->requiresConfirmation(),
+                    ->modalHeading('Konfirmasi Transfer Peserta')
+                    ->modalDescription('Untuk melanjutkan proses transfer peserta, mohon ketikkan teks berikut persis di kolom bawah.')
+                    ->modalSubmitActionLabel('Transfer Sekarang')
+                    ->form([
+                        TextInput::make('confirmation_phrase')
+                            ->label('Ketik: "Saya yakin untuk transfer peserta!"')
+                            ->required()
+                            ->rules(['in:Saya yakin untuk transfer peserta!'])
+                            ->validationMessages([
+                                'in' => 'Teks konfirmasi yang Anda masukkan tidak sesuai. Mohon periksa kembali.',
+                            ]),
+                    ])
+                    ->action(function (array $data) {
+                        PesertaKertosono::createKertosonoParticipantsFromPreviousMonth();
+                        \Filament\Notifications\Notification::make()
+                            ->title('Transfer peserta tes berhasil!')
+                            ->success()
+                            ->send();
+                    }),
                 Action::make('assign_cocard')
                     ->label('Assign Cocard')
-                    ->action(function () {
-                        PesertaKertosono::updateNomorCocard();
-                    })
                     ->color('danger')
                     ->icon('heroicon-o-exclamation-circle')
-                    ->requiresConfirmation(),
-                ExportAction::make()
+                    ->modalHeading('Konfirmasi Assign Cocard')
+                    ->modalDescription('Untuk melanjutkan proses assign cocard, mohon ketikkan teks berikut persis di kolom bawah.')
+                    ->modalSubmitActionLabel('Assign Cocard Sekarang')
+                    ->form([
+                        TextInput::make('confirmation_phrase')
+                            ->label('Ketik: "Saya yakin untuk meng-assign cocard peserta!"')
+                            ->required()
+                            ->rules(['in:Saya yakin untuk meng-assign cocard peserta!'])
+                            ->validationMessages([
+                                'in' => 'Teks konfirmasi yang Anda masukkan tidak sesuai. Mohon periksa kembali.',
+                            ]),
+                    ])
+                    ->action(function (array $data) {
+                        PesertaKertosono::updateNomorCocard();
+                        \Filament\Notifications\Notification::make()
+                            ->title('Assign cocard peserta tes berhasil!')
+                            ->success()
+                            ->send();
+                    }),
+                ExportAction::make('ekspor_peserta')
                     ->label('Ekspor')
                     ->exporter(PesertaKertosonoExporter::class)
             ])
