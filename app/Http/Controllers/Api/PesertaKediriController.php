@@ -41,8 +41,8 @@ class PesertaKediriController extends Controller
             ->withCount('akademik');
 
         // Apply conditional filters based on request parameters
-        if ($request->has('filter')) {
-            $filterOption = $request->input('filter');
+        if ($request->has('kategori')) {
+            $filterOption = $request->input('kategori');
 
             switch ($filterOption) {
                 case 'anda-simak':
