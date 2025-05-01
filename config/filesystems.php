@@ -47,6 +47,17 @@ return [
             'report' => false,
         ],
 
+        'ponpes_images' => [
+            'driver' => 'local',
+            // Sesuaikan path ini berdasarkan struktur direktori Anda
+            // Ini mengasumsikan 'app_ponpes' adalah saudara dari root proyek Laravel Anda
+            'root' => '/var/www/html/app_ponpes/public/images', // Absolute path
+            'url' => env('APP_URL').'/app_ponpes/public/images', // URL ini mungkin perlu penyesuaian atau tidak digunakan tergantung kebutuhan
+            'visibility' => 'public',
+            'throw' => false, // Jangan lemparkan exception jika direktori tidak ditemukan saat operasi file
+        ],
+
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

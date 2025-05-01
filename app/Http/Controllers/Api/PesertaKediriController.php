@@ -33,7 +33,7 @@ class PesertaKediriController extends Controller
             ->leftJoin('tb_personal_data', "{$mainTable}.nispn", '=', 'tb_personal_data.nispn')
             ->allowedFilters($this->allowedFilters())
             ->where("{$mainTable}.id_periode", $periode_pengetesan_id)
-            ->where("{$mainTable}.status_tes", StatusTes::AKTIF->value)
+            ->whereIn("{$mainTable}.status_tes", [StatusTes::AKTIF->value, StatusTes::LULUS->value, StatusTes::TIDAK_LULUS_AKADEMIK->value, StatusTes::TIDAK_LULUS_AKHLAK->value])
             ->where("{$mainTable}.del_status", NULL)
             // Apply scopes and load relationships efficiently
             ->tap(fn($query) => $query->withHasilSistem())

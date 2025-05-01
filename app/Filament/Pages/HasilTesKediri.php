@@ -190,7 +190,7 @@ class HasilTesKediri extends Page implements HasTable
                 Action::make('sesuaikan_hasil_Sistem')
                     ->label('Sesuaikan Hasil')
                     ->action(function () use ($periode_pengetesan_id): void {
-                        DB::table('tes_santri')
+                        DB::table('tb_tes_santri')
                             ->where('id_periode', $periode_pengetesan_id)
                             ->whereNotIn('status_tes', [
                                 StatusTesKediri::PRA_TES->value,

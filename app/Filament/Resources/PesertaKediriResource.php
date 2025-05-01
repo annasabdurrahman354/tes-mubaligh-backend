@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Enums\JenisKelamin;
 use App\Enums\KelompokKediri;
+use App\Enums\StatusKelanjutanKediri;
 use App\Filament\Exports\PesertaKediriExporter;
 use App\Filament\Imports\UpdateRFIDPesertaKediriImporter;
 use App\Filament\Imports\UpdateStatusTesPesertaKediriImporter;
@@ -13,9 +14,11 @@ use App\Filament\Resources\PesertaKediriResource\Pages\ListPesertaKediris;
 use App\Filament\Resources\PesertaKediriResource\Pages\ViewPesertaKediri;
 use App\Models\Periode;
 use App\Models\PesertaKediri;
+use App\Models\Ponpes;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
@@ -25,6 +28,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 class PesertaKediriResource extends Resource
 {
@@ -49,6 +53,10 @@ class PesertaKediriResource extends Resource
             ->columns(PesertaKediri::getColumns())
             ->defaultSort('siswa.nama_lengkap')
             ->filters([
+                SelectFilter::make('id_periode')
+                    ->label('Periode Tes')
+                    ->options(Periode::orderBy('id_periode', 'desc')->get()->pluck('id_periode', 'id_periode'))
+                    ->searchable(),
                 Filter::make('jenis_kelamin')
                     ->form([
                         Select::make('jenis_kelamin')
@@ -78,10 +86,24 @@ class PesertaKediriResource extends Resource
                 SelectFilter::make('kelompok')
                     ->label('Kelompok')
                     ->options(KelompokKediri::class),
-                SelectFilter::make('id_periode')
-                    ->label('Periode Tes')
-                    ->options(Periode::orderBy('id_periode', 'desc')->get()->pluck('id_periode', 'id_periode'))
-                    ->searchable()
+                SelectFilter::make('id_ponpes')
+                    ->label('Asal Ponpes')
+                    ->options(
+                        Ponpes::with('daerah')
+                            ->join('tb_daerah', 'tb_ponpes.id_daerah', '=', 'tb_daerah.id_daerah')
+                            ->orderByRaw('LOWER(tb_daerah.n_daerah), LOWER(tb_ponpes.n_ponpes)')
+                            ->get()
+                            ->map(function ($item) {
+                                return [
+                                    'id' => $item->id_ponpes,
+                                    'name' => "{$item->n_ponpes} ({$item->daerah->n_daerah})"
+                                ];
+                            })
+                            ->pluck('name', 'id')
+                            ->toArray()
+                    )
+                    ->preload()
+                    ->searchable(),
             ], layout: FiltersLayout::AboveContent)
             ->actions([
                 Tables\Actions\ViewAction::make(),
@@ -112,7 +134,7 @@ class PesertaKediriResource extends Resource
                             ->title('Assign cocard peserta tes berhasil!')
                             ->success()
                             ->send();
-                    }),
+                }),
                 Tables\Actions\ImportAction::make('update_status_tes')
                     ->label('Update Status Tes')
                     ->importer(UpdateStatusTesPesertaKediriImporter::class)
@@ -131,6 +153,28 @@ class PesertaKediriResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make()
                         ->requiresConfirmation(),
+                    Tables\Actions\BulkAction::make('updateStatusKelanjutan')
+                        ->label('Ubah Kelanjutan') // Set a user-friendly label
+                        ->icon('heroicon-o-pencil-square') // Choose an appropriate icon
+                        ->requiresConfirmation() // Make the user confirm the action
+                        ->color('danger')
+                        ->form([
+                            Select::make('status_kelanjutan')
+                                ->label('Status Kelanjutan')
+                                ->options(StatusKelanjutanKediri::class)
+                                ->required(),
+                        ])
+                        ->action(function (Collection $records, array $data): void {
+                            foreach ($records as $record) {
+                                $record->status_kelanjutan = $data['status_kelanjutan'];
+                                $record->save();
+                            }
+                            Notification::make()
+                                ->title('Status Kelanjutan Peserta Diperbarui')
+                                ->success()
+                                ->send();
+                        })
+                        ->deselectRecordsAfterCompletion(),
                 ]),
             ])
             ->selectCurrentPageOnly()

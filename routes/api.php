@@ -53,7 +53,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Route to get specific Peserta Kertosono data for verification
     Route::get('/peserta-kertosono/verifikasi', [PesertaKertosonoVerifikasiController::class, 'index']);
     Route::get('/peserta-kertosono/verifikasi/{id_tes_santri}', [PesertaKertosonoVerifikasiController::class, 'show']);
-    Route::patch('/peserta-kertosono/verifikasi/{id_tes_santri}', [PesertaKertosonoVerifikasiController::class, 'update']); // Using PATCH for partial updates
+    Route::post('/peserta-kertosono/verifikasi/{id_tes_santri}', [PesertaKertosonoVerifikasiController::class, 'update']); // Using PATCH for partial updates
 
     Route::post('/update-username', [UserProfileController::class, 'updateUsername'])->name('update.username');
     Route::post('/update-password', [UserProfileController::class, 'updatePassword'])->name('update.password');

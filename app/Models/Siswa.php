@@ -118,6 +118,14 @@ class Siswa extends Model implements HasMedia
         );
     }
 
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('siswa_foto_identitas')
+            ->singleFile()
+            ->useDisk('public');
+    }
+
+
     public function registerMediaConversions(Media $media = null): void
     {
         $this->addMediaConversion('thumb')
