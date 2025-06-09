@@ -126,13 +126,16 @@ class PesertaKertosono extends Model
      *
      * @return void
      */
-    public static function updateNomorCocard(): void
+    public static function updateNomorCocard($periode): void
     {
-        $periodePengetesan = getPeriodeTes();
-        DB::transaction(function () use ($periodePengetesan) {
+        if (!Periode::where('id_periode', $periode)->first()) {
+            throw new \Exception("Periode Tes tidak ditemukan.");
+        }
+
+        DB::transaction(function () use ($periode) {
             $sortedPesertaIds = PesertaKertosono::query()
                 ->where('status_tes', StatusTesKertosono::AKTIF->value)
-                ->where('id_periode', $periodePengetesan)
+                ->where('id_periode', $periode)
                 ->join('tb_personal_data', 'tb_tes_santri.nispn', '=', 'tb_personal_data.nispn')
                 ->join('tb_ponpes', 'tb_tes_santri.id_ponpes', '=', 'tb_ponpes.id_ponpes')
                 ->join('tb_daerah', 'tb_ponpes.id_daerah', '=', 'tb_daerah.id_daerah')

@@ -2,7 +2,9 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\BulanNomor;
 use App\Enums\JenisKelamin;
+use App\Enums\StatusPeriode;
 use App\Filament\Exports\PesertaKertosonoExporter;
 use App\Filament\Resources\PesertaKertosonoResource\Pages\CreatePesertaKertosono;
 use App\Filament\Resources\PesertaKertosonoResource\Pages\EditPesertaKertosono;
@@ -10,6 +12,8 @@ use App\Filament\Resources\PesertaKertosonoResource\Pages\ListPesertaKertosonos;
 use App\Filament\Resources\PesertaKertosonoResource\Pages\ViewPesertaKertosono;
 use App\Models\Periode;
 use App\Models\PesertaKertosono;
+use Exception;
+use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -112,9 +116,28 @@ class PesertaKertosonoResource extends Resource
                     ->color('danger')
                     ->icon('heroicon-o-exclamation-circle')
                     ->modalHeading('Konfirmasi Assign Cocard')
-                    ->modalDescription('Untuk melanjutkan proses assign cocard, mohon ketikkan teks berikut persis di kolom bawah.')
+                    ->modalDescription('Untuk melanjutkan proses, mohon isi periode dan ketikkan teks berikut persis di kolom bawah.')
                     ->modalSubmitActionLabel('Assign Cocard Sekarang')
                     ->form([
+                        Grid::make(2)
+                            ->schema([
+                                Select::make('bulan')
+                                    ->label('Bulan')
+                                    ->required()
+                                    ->options(BulanNomor::class)
+                                    ->placeholder('Pilih Bulan')
+                                    ->searchable(),
+
+                                Select::make('tahun')
+                                    ->label('Tahun')
+                                    ->required()
+                                    ->options(collect(range(date('Y') - 5, date('Y') + 2))
+                                        ->mapWithKeys(fn($year) => [$year => $year])
+                                        ->toArray())
+                                    ->placeholder('Pilih Tahun')
+                                    ->searchable()
+                                    ->default(date('Y')),
+                            ]),
                         TextInput::make('confirmation_phrase')
                             ->label('Ketik: "Saya yakin untuk meng-assign cocard peserta!"')
                             ->required()
@@ -124,11 +147,29 @@ class PesertaKertosonoResource extends Resource
                             ]),
                     ])
                     ->action(function (array $data) {
-                        PesertaKertosono::updateNomorCocard();
-                        \Filament\Notifications\Notification::make()
-                            ->title('Assign cocard peserta tes berhasil!')
-                            ->success()
-                            ->send();
+                        $periode = $data['tahun'] . $data['bulan'];
+                        $status = Periode::where('id_periode', $periode)->first()?->status;
+
+                        if (!$status || ($status != StatusPeriode::PENGETESAN->value && $status != StatusPeriode::REGISTRASI->value)) {
+                            \Filament\Notifications\Notification::make()
+                                ->title('Periode terpilih tidak aktif sebagai pendaftaran maupun pengetesan!')
+                                ->danger()
+                                ->send();
+                        } else {
+                            try {
+                                PesertaKertosono::updateNomorCocard($periode);
+                                \Filament\Notifications\Notification::make()
+                                    ->title('Assign cocard peserta tes berhasil!')
+                                    ->success()
+                                    ->send();
+                            }
+                            catch (Exception){
+                                \Filament\Notifications\Notification::make()
+                                    ->title('Assign cocard peserta tes gagal!')
+                                    ->danger()
+                                    ->send();
+                            }
+                        }
                     }),
                 ExportAction::make('ekspor_peserta')
                     ->label('Ekspor')

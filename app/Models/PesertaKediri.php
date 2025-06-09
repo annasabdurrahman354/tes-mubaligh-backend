@@ -87,19 +87,18 @@ class PesertaKediri extends Model
         );
     }
 
-    public static function updateNomorCocardAndKelompok(): void
+    public static function updateNomorCocardAndKelompok($periode): void
     {
-        DB::transaction(function () {
+        if (!Periode::where('id_periode', $periode)->first()) {
+            throw new \Exception("Periode Tes tidak ditemukan.");
+        }
+
+        DB::transaction(function () use ($periode) {
             $kelompokList = range('A', 'T');
             $numKelompok = count($kelompokList); // Should be 20
-            $periodeTesId = getPeriodeTes(); // Get the specific periode ID
-
-            if (!$periodeTesId) {
-                throw new \Exception("Periode Tes tidak ditemukan.");
-            }
 
             // 1. Fetch participants for the specific periode, eager-loading required siswa data
-            $pesertaData = PesertaKediri::where('id_periode', $periodeTesId)
+            $pesertaData = PesertaKediri::where('id_periode', $periode)
                 ->where('status_tes', StatusTesKediri::PRA_TES)
                 ->with(['siswa' => function ($query) {
                     $query->select('nispn', 'jenis_kelamin', 'nama_lengkap');

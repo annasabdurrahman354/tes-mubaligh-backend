@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Provinsi;
-use App\Models\Kota;
+use App\Models\Daerah;
 use App\Models\Kecamatan;
 use App\Models\Kelurahan;
-use App\Models\Daerah;
+use App\Models\Kota;
 use App\Models\Ponpes;
+use App\Models\Provinsi;
 
 
 class OptionsController extends Controller
