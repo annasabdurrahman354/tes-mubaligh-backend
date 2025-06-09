@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\OptionsController;
 use App\Http\Controllers\Api\PesertaKertosonoVerifikasiController;
+use App\Http\Controllers\Api\PPWB\SiswaPPWBController;
 use App\Http\Controllers\Api\UserProfileController;
 use App\Http\Controllers\Api\WhatsAppController;
 use Illuminate\Http\Request;
@@ -70,4 +71,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('ponpes', [OptionsController::class, 'getPonpes']);
     });
 
+
 });
+
+Route::get('/siswa-ppwb', [SiswaPPWBController::class, 'index']);
+Route::post('/siswa-ppwb/update-photo', [SiswaPPWBController::class, 'updatePhoto']);
