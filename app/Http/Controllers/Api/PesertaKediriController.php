@@ -8,10 +8,12 @@ use App\Filters\FiltersNamaOrCocard;
 use App\Models\PesertaKediri;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Spatie\QueryBuilder\QueryBuilder;
-use Spatie\QueryBuilder\AllowedFilter;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Pagination\LengthAwarePaginator; // <-- Added for pagination
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
+
+// <-- Added for pagination
 
 class PesertaKediriController extends Controller
 {
@@ -55,7 +57,7 @@ class PesertaKediriController extends Controller
                 case 'simak-tersedikit':
                     // NOTE: Runs a separate query. Ensure indexes on akademik FK and peserta_kediri filters.
                     $baseCountQuery = PesertaKediri::where('id_periode', $periode_pengetesan_id)
-                        ->where('status_tes', StatusTes::AKTIF->value)
+                        ->whereIn("status_tes", [StatusTes::AKTIF->value, StatusTes::LULUS->value, StatusTes::TIDAK_LULUS_AKADEMIK->value, StatusTes::TIDAK_LULUS_AKHLAK->value])
                         ->where('del_status', NULL);
 
                     if ($filterOption === 'simak-terbanyak') {

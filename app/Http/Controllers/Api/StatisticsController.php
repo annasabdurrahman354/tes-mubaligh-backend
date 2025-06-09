@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Enums\HasilSistem;
+use App\Enums\JenisKelamin;
 use App\Enums\StatusTes;
 use App\Models\PesertaKediri;
+use App\Models\PesertaKertosono;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Enums\JenisKelamin;
-use App\Models\PesertaKertosono;
 
 class StatisticsController extends Controller
 {

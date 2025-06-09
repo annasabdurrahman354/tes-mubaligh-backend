@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\User; // Pastikan untuk mengimpor model User Anda
+use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log; // Impor Log facade
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
+
+// Pastikan untuk mengimpor model User Anda
+// Impor Log facade
 // Note: Validator facade is no longer directly needed in methods if using $request->validate()
 // use Illuminate\Support\Facades\Validator;
 // use Illuminate\Validation\Rules\Password; // Not used in the provided code snippet
