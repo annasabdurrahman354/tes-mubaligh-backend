@@ -17,7 +17,7 @@
                     </x-filament::button>
                 </x-slot>
 
-                <div id="view-print">
+                <div id="view-print" style="background-color: white; color: black">
                     @if (!empty($pengumumanPerKelompok))
                         @foreach ($pengumumanPerKelompok as $kelompok => $santriKelompok)
                             <div style="page-break-after: always;">
@@ -27,19 +27,22 @@
                                             <tr>
                                                 @endif
 
-                                                <td style="width: 50%; padding: 10px; vertical-align: top; border: 1px solid black !important; background-color: #f9f9f9; text-align: left; page-break-inside: avoid; break-inside: avoid;">
-                                                    <div style="margin-bottom: 20px;">
-                                                        <div style="display: flex; justify-content: space-between;">
-                                                            <div><strong>Nama:</strong> {{ $santriItem['nama_lengkap'] }}</div>
-                                                            <div style="font-weight: bold; background-color: #ddd; padding: 5px; width: 30px; text-align: center;">
+                                                <td style="width: 50%; padding: 15px 10px; vertical-align: top; border: 1px solid black !important; background-color: #f9f9f9; text-align: left; page-break-inside: avoid; break-inside: avoid; font-size: 14px;">
+                                                    <div>
+                                                        <div style="display: flex; align-items: flex-start; position: relative;">
+                                                            <div style="flex: 1; color: black; padding-right: 60px; line-height: 1.4em; height: 2.8em; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; text-overflow: ellipsis;">
+                                                                <strong>Nama:</strong> {{ $santriItem['nama_lengkap'] }}
+                                                            </div>
+                                                            <div style="position: absolute; right: 0; font-weight: bold; background-color: #ddd; padding: 5px; width: 30px; text-align: center; color: black; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
                                                                 {{ $santriItem['jenis_kelamin'] }}
                                                             </div>
                                                         </div>
-                                                        <div><strong>Kelompok:</strong> {{ $santriItem['kelompok'] }}{{ $santriItem['nomor_cocard'] }} </div>
-                                                        <div><strong>Alamat:</strong> {{ $santriItem['daerah_sambung'] }}</div>
-                                                        <div><strong>Pondok:</strong> {{ $santriItem['ponpes'] }}</div>
-                                                        <div><strong>Daerah Pondok:</strong> {{ $santriItem['daerah_ponpes'] }}</div>
-                                                        <p style="margin-top: 10px;">
+                                                        <div style="color: black"><strong>Kelompok:</strong> {{ $santriItem['kelompok'] }}{{ $santriItem['nomor_cocard'] }} </div>
+                                                        <div style="color: black"><strong>Alamat:</strong> {{ $santriItem['daerah_sambung'] }}</div>
+                                                        <div style="color: black; line-height: 1.4em; height: 2.8em; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; text-overflow: ellipsis;">
+                                                            <strong>Pondok:</strong> {{ $santriItem['ponpes'] }} ({{ $santriItem['daerah_ponpes'] }})
+                                                        </div>
+                                                        <p style="margin-top: 10px; color: black">
                                                             @if ($santriItem['status'] === 'Lulus')
                                                                 Dinyatakan <strong>Lulus</strong> Tes Kediri Periode {{ $santriItem['periode_bulan'] }} {{ $santriItem['periode_tahun'] }} Dengan <strong>Nilai Akademik {{ $santriItem['nilai_akademik'] }}</strong>
                                                             @elseif ($santriItem['status'] === 'Tidak Lulus Akademik')
@@ -52,7 +55,6 @@
                                                         </p>
                                                     </div>
                                                 </td>
-
                                                 @if ($index % 2 !== 0)
                                             </tr>
                                             @endif

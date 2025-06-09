@@ -150,20 +150,20 @@ class PengumumanTesKediri extends Page implements HasForms
             ->get()
             ->map(function ($peserta) use ($periode) {
                 return [
-                    'nama_lengkap' => strtoupper(optional($peserta->siswa)->nama_lengkap),
-                    'jenis_kelamin' => optional($peserta->siswa->jenis_kelamin)->value,
+                    'nama_lengkap' => strtoupper($peserta->siswa?->nama_lengkap ?? ''),
+                    'jenis_kelamin' => $peserta->siswa?->jenis_kelamin?->value ?? null,
                     'kelompok' => $peserta->kelompok ?? null,
                     'nomor_cocard' => $peserta->nomor_cocard ?? null,
-                    'daerah_sambung' => optional($peserta->siswa->daerahSambung)->n_daerah
-                        ? strtoupper(optional($peserta->siswa->daerahSambung)->n_daerah)
+                    'daerah_sambung' => $peserta->siswa?->daerahSambung?->n_daerah
+                        ? strtoupper($peserta->siswa->daerahSambung->n_daerah)
                         : null,
-                    'ponpes' => optional($peserta->ponpes)->n_ponpes
-                        ? strtoupper(optional($peserta->ponpes)->n_ponpes)
+                    'ponpes' => $peserta->ponpes?->n_ponpes
+                        ? strtoupper(trim(str_replace($peserta->ponpes?->daerah?->n_daerah ?? "", "", $peserta->ponpes->n_ponpes)))
                         : null,
-                    'daerah_ponpes' => optional(optional($peserta->ponpes)->daerah)->n_daerah, // Corrected optional chaining
-                    'poin_akhlak' => $peserta->totalPoinAkhlak, // Assuming this attribute exists from withHasilSistem
-                    'nilai_akademik' => $peserta->avg_nilai !== null ? number_format($peserta->avg_nilai, 1) : null, // Assuming this attribute exists from withHasilSistem
-                    'status' => optional($peserta->status_tes)->getLabel(),
+                    'daerah_ponpes' => $peserta->ponpes?->daerah?->n_daerah ?? null,
+                    'poin_akhlak' => $peserta->totalPoinAkhlak ?? null,
+                    'nilai_akademik' => $peserta->avg_nilai !== null ? number_format($peserta->avg_nilai, 1) : null,
+                    'status' => $peserta->status_tes?->getLabel() ?? null,
                     'periode_bulan' => $periode['monthName'] ?? null,
                     'periode_tahun' => $periode['year'] ?? null,
                 ];
